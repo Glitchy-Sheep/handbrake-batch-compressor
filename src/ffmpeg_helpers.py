@@ -1,4 +1,4 @@
-import ffmpeg
+import av
 
 from pydantic import BaseModel
 
@@ -22,15 +22,12 @@ def get_video_resolution(video_path: str) -> VideoResolution:
     Get the resolution of a video as a VideoResolution object
     if, for some reason, the resolution can't be determined, return None
     """
-    probe = ffmpeg.probe(video_path)
     try:
-        video_stream = next(
-            (stream for stream in probe["streams"] if stream["codec_type"] == "video"),
-            None,
-        )
-        return VideoResolution(
-            width=video_stream["width"],
-            height=video_stream["height"],
-        )
-    except:
+        probe = av.open(video_path)
+        width = probe.streams.video[0].width
+        height = probe.streams.video[0].height
+        probe.close()
+        return VideoResolution(width=width, height=height)
+    except Exception as e:
+        log.error(f"Error getting video resolution: {e}")
         return None
