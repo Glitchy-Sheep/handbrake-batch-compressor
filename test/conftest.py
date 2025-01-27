@@ -59,8 +59,8 @@ def generate_video_files_data() -> Generator[VideoSampleData, None, None]:
 
     os.makedirs(target_dir, exist_ok=True)
 
-    video_files = [f"test{ext}" for ext in supported_videofile_extensions]
-    video_files += [f"nested/test{ext}" for ext in supported_videofile_extensions]
+    video_files = [f"test.{ext}" for ext in supported_videofile_extensions]
+    video_files += [f"nested/test.{ext}" for ext in supported_videofile_extensions]
 
     fake_files = [
         "test.txt",
