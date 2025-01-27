@@ -2,9 +2,24 @@ import os
 
 import typer
 
-from src.cli_helpers import install_package, is_ffmpeg_installed
+from src.batch_video_compressor import BatchVideoCompressor
+from src.software_installers import ffmpeg, handbrake_cli
 from src.logger import log
 from src.videofiles_traverser import get_video_files_paths
+
+
+def setup_software():
+    if not ffmpeg.is_installed():
+        log.wait("Installing FFmpeg...")
+        ffmpeg.install()
+
+    log.success("FFmpeg is installed.")
+
+    if not handbrake_cli.is_installed():
+        log.wait("Installing Handbrake CLI...")
+        handbrake_cli.install()
+
+    log.success("Handbrake CLI is installed.")
 
 
 def main(target_path):
@@ -13,11 +28,7 @@ def main(target_path):
         log.error("Your target path is not a directory or doesn't exist")
         return
 
-    if not is_ffmpeg_installed():
-        log.wait("Installing FFmpeg...")
-        install_package("ffmpeg")
-
-    log.success("FFmpeg is installed.")
+    setup_software()
 
     log.wait("Collecting all your video files...")
     video_files = list(get_video_files_paths(target_path))
