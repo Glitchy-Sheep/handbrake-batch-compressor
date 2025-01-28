@@ -8,6 +8,7 @@ from src.logger import log
 class BatchVideoCompressor:
     def __init__(
         self,
+        verbose: bool,
         video_files: set[str],
         progress_ext="compressing",
         complete_ext="compressed",
@@ -15,6 +16,7 @@ class BatchVideoCompressor:
         self.progress_ext = progress_ext
         self.complete_ext = complete_ext
         self.video_files = video_files
+        self.verbose = verbose
 
     def compress_video(self, input_video: str, output_video: str):
         compress_cmd = [
@@ -36,8 +38,8 @@ class BatchVideoCompressor:
             subprocess.run(
                 compress_cmd,
                 check=True,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.PIPE,
+                stdout=subprocess.PIPE if not self.verbose else None,
+                stderr=subprocess.PIPE if not self.verbose else None,
             )
             log.info(f"Compressed {os.path.basename(input_video)}")
         except subprocess.CalledProcessError as e:

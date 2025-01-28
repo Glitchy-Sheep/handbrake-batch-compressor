@@ -39,7 +39,12 @@ def remove_incomplete_files(incomplete_files) -> int:
             log.error(f"Failed to remove file {file}: {e}")
 
 
-def main(target_path, progress_ext="compressing", complete_ext="compressed"):
+def main(
+    target_path: str,
+    progress_ext: str = "compressing",
+    complete_ext: str = "compressed",
+    verbose: bool = False,
+):
     check_target_path(target_path)
     setup_software()
 
@@ -76,7 +81,8 @@ def main(target_path, progress_ext="compressing", complete_ext="compressed"):
         log.success(f"Removed {len(incomplete_files)} incomplete files. 🧹✨")
 
     compressor = BatchVideoCompressor(
-        unprocessed_files,
+        verbose=verbose,
+        video_files=unprocessed_files,
         progress_ext=progress_ext,
         complete_ext=complete_ext,
     )
