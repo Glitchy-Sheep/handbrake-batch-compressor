@@ -5,7 +5,11 @@ import typer
 import typer.rich_utils
 
 from src.batch_video_compressor import BatchVideoCompressor
-from src.cli_guards import check_extensions_arguments, check_target_path
+from src.cli_guards import (
+    check_extensions_arguments,
+    check_handbrakecli_options,
+    check_target_path,
+)
 from src.file_utils import FileUtils
 from src.third_party_installers import setup_software
 from src.logger import log
@@ -51,6 +55,14 @@ def main(
             "--target-path",
             "-t",
             help="The path where your videos are.",
+        ),
+    ],
+    handbrakecli_options: Annotated[
+        str,
+        typer.Option(
+            "--handbrakecli-options",
+            "-o",
+            help="You can pass HandbrakeCLI options through this argument. (Don't forget to quote them in one string)",
         ),
     ],
     progress_ext: Annotated[
@@ -99,10 +111,19 @@ def main(
     The utility use file extension to skip already compressed videos.
     You can customize it with --progress-extension and --complete-extension
     But they should be unique and don't contain dots.
+
+    [bold green] Examples: [/bold green]
+        1. Compress all the videos in ./videos and delete original files with handbrakecli output:
+            [bold]- ./main.py -t ./videos -v -d[/bold]
+        2. Compress files with choosing encoder and quality:
+            [bold]- ./main.py -t ./videos -v --handbrakecli-options "--encoder qsv_h264 --quality 20"[bold]
+        3. Compress files using a preset:
+            [bold]- ./main.py -t ./videos -v --handbrakecli-options "--preset 'Fast 720p30'"[bold]
     """
 
     check_target_path(target_path)
     check_extensions_arguments(progress_ext, complete_ext)
+    check_handbrakecli_options(handbrakecli_options)
 
     setup_software()
 
@@ -123,7 +144,6 @@ def main(
             unprocessed_files.add(file)
 
     for file in map(FileUtils.filename_with_original_extension, complete_files):
-        print(file)
         unprocessed_files.discard(file)
 
     log.info(f"Found complete files: {len(complete_files)}")
@@ -140,8 +160,11 @@ def main(
         video_files=unprocessed_files,
         progress_ext=progress_ext,
         complete_ext=complete_ext,
+        handbrakecli_options=handbrakecli_options,
     )
     compressor.compress_videos()
+
+    log.success("Everything is done! 🎉")
 
 
 if __name__ == "__main__":

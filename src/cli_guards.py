@@ -1,6 +1,7 @@
 import os
 
 from src.logger import log
+from textwrap import dedent
 
 
 def check_target_path(target_path):
@@ -21,4 +22,22 @@ def check_extensions_arguments(progress_ext, complete_ext):
 
     if len(progress_ext) == 0 or len(complete_ext) == 0:
         log.error("Progress and complete extensions cannot be empty.")
+        exit(1)
+
+
+def check_handbrakecli_options(handbrakecli_options):
+    if (
+        "-i" in handbrakecli_options
+        or "-o" in handbrakecli_options
+        or "--input" in handbrakecli_options
+        or "--output" in handbrakecli_options
+    ):
+        log.error(
+            dedent(
+                """
+            You should not use input/output handbrakecli options, it will fail the process.
+            The utility will automatically add them for you.
+            """
+            )
+        )
         exit(1)
