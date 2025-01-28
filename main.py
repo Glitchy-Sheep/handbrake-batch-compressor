@@ -49,6 +49,20 @@ def remove_incomplete_files(incomplete_files) -> int:
             log.error(f"Failed to remove file {file}: {e}")
 
 
+def check_extensions_arguments(progress_ext, complete_ext):
+    if progress_ext.count(".") > 0 or complete_ext.count(".") > 0:
+        log.error("Progress and complete extensions cannot contain dots.")
+        exit(1)
+
+    if progress_ext == complete_ext:
+        log.error("Progress and complete extensions cannot be the same.")
+        exit(1)
+
+    if len(progress_ext) == 0 or len(complete_ext) == 0:
+        log.error("Progress and complete extensions cannot be empty.")
+        exit(1)
+
+
 @app.command()
 def main(
     target_path: Annotated[
@@ -108,11 +122,9 @@ def main(
     """
 
     check_target_path(target_path)
-    setup_software()
+    check_extensions_arguments(progress_ext, complete_ext)
 
-    if progress_ext.count(".") > 0 or complete_ext.count(".") > 0:
-        log.error("Progress and complete extensions cannot contain dots.")
-        return
+    setup_software()
 
     # All video files, unprocessed, processed and incomplete
     video_files = get_video_files(target_path)
