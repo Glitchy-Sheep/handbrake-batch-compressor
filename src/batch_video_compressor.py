@@ -9,6 +9,7 @@ class BatchVideoCompressor:
     def __init__(
         self,
         verbose: bool,
+        delete_original_files: bool,
         video_files: set[str],
         progress_ext="compressing",
         complete_ext="compressed",
@@ -17,6 +18,7 @@ class BatchVideoCompressor:
         self.complete_ext = complete_ext
         self.video_files = video_files
         self.verbose = verbose
+        self.delete_original_files = delete_original_files
 
     def compress_video(self, input_video: str, output_video: str):
         compress_cmd = [
@@ -58,3 +60,6 @@ class BatchVideoCompressor:
             # filename.compressing.ext -> filename.compressed.ext
             final_name = output_video.replace(self.progress_ext, self.complete_ext)
             os.rename(output_video, final_name)
+
+            if self.delete_original_files:
+                os.remove(input_video)

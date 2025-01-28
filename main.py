@@ -43,6 +43,7 @@ def main(
     target_path: str,
     progress_ext: str = "compressing",
     complete_ext: str = "compressed",
+    delete_original_files: bool = False,
     verbose: bool = False,
 ):
     check_target_path(target_path)
@@ -81,6 +82,7 @@ def main(
         log.success(f"Removed {len(incomplete_files)} incomplete files. 🧹✨")
 
     compressor = BatchVideoCompressor(
+        delete_original_files=delete_original_files,
         verbose=verbose,
         video_files=unprocessed_files,
         progress_ext=progress_ext,
