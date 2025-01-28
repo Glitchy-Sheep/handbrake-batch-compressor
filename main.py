@@ -32,16 +32,11 @@ def remove_incomplete_files(incomplete_files) -> int:
     """
     Remove incomplete files and update the task queue.
     """
-    deleted_count = 0
     for file in incomplete_files:
         try:
             os.remove(file)
-            deleted_count += 1
         except OSError as e:
             log.error(f"Failed to remove file {file}: {e}")
-
-    if deleted_count > 0:
-        log.success(f"Deleted {deleted_count} incomplete files.")
 
 
 def main(target_path, progress_ext="compressing", complete_ext="compressed"):
@@ -75,6 +70,10 @@ def main(target_path, progress_ext="compressing", complete_ext="compressed"):
     log.info(f"Found complete files: {len(complete_files)}")
     log.info(f"Found incomplete files: {len(incomplete_files)}")
     log.info(f"Found unprocessed files: {len(unprocessed_files)}")
+
+    if len(incomplete_files) > 0:
+        remove_incomplete_files(incomplete_files)
+        log.success(f"Removed {len(incomplete_files)} incomplete files. 🧹✨")
 
     compressor = BatchVideoCompressor(
         unprocessed_files,
