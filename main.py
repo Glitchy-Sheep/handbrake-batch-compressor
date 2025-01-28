@@ -3,7 +3,7 @@ import os
 import typer
 
 from src.batch_video_compressor import BatchVideoCompressor
-from src.software_installers import ffmpeg, handbrake_cli
+from src.third_party_installers import setup_software
 from src.logger import log
 from src.videofiles_traverser import get_video_files_paths
 
@@ -15,23 +15,9 @@ def check_target_path(target_path):
         return
 
 
-def setup_software():
-    if not ffmpeg.is_installed():
-        log.wait("Installing FFmpeg...")
-        ffmpeg.install()
-
-    log.success("FFmpeg is installed.")
-
-    if not handbrake_cli.is_installed():
-        log.wait("Installing Handbrake CLI...")
-        handbrake_cli.install()
-
-    log.success("Handbrake CLI is installed.")
-
-
 def get_video_files(target_path):
     log.wait("Collecting all your video files...")
-    video_files = list(get_video_files_paths(target_path))
+    video_files = set(get_video_files_paths(target_path))
 
     if len(video_files) == 0:
         log.error("No video files found.")
@@ -73,9 +59,13 @@ def main(target_path, progress_ext="compressing.mp4", complete_ext="compressed.m
     check_target_path(target_path)
     setup_software()
 
+    # All video files, unprocessed, processed and incomplete
     video_files = get_video_files(target_path)
 
+    # Completed files should be ignored as its originals
     completed_files = find_complete_files(video_files, complete_ext)
+
+    # All incomplete files should be deleted and ignored
     incomplete_files = find_incomplete_files(video_files, progress_ext)
 
     remove_incomplete_files(incomplete_files)

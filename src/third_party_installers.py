@@ -67,3 +67,17 @@ handbrake_cli = Software(
     ),
     check_cmd="handbrakecli --version",
 )
+
+
+def setup_software():
+    if not ffmpeg.is_installed():
+        log.wait("Installing FFmpeg...")
+        ffmpeg.install()
+
+    log.success("FFmpeg is installed.")
+
+    if not handbrake_cli.is_installed():
+        log.wait("Installing Handbrake CLI...")
+        handbrake_cli.install()
+
+    log.success("Handbrake CLI is installed.")

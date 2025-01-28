@@ -52,8 +52,8 @@ class VideoSampleData(BaseModel):
 @pytest.fixture
 def generate_video_files_data() -> Generator[VideoSampleData, None, None]:
     """
-    Create video files under data with nested folders and junk files
-    return the list of video files
+    Create video files under /test/data with nested folders and junk files
+    return the list of video files with
     """
     target_dir = "test/data"
 
