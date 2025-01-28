@@ -1,15 +1,16 @@
 import os
 import subprocess
 
+from src.file_utils import FileUtils
 from src.logger import log
 
 
 class BatchVideoCompressor:
     def __init__(
         self,
-        video_files: list[str],
-        progress_ext=".compressing.mp4",
-        complete_ext=".compressed.mp4",
+        video_files: set[str],
+        progress_ext="compressing",
+        complete_ext="compressed",
     ):
         self.progress_ext = progress_ext
         self.complete_ext = complete_ext
@@ -31,25 +32,27 @@ class BatchVideoCompressor:
         ]
 
         try:
-            subprocess.run(compress_cmd, check=True)
-            log.info(f"Compressed {input_video} to {output_video}")
+            log.info(f"Compressing {os.path.basename(input_video)}")
+            subprocess.run(
+                compress_cmd,
+                check=True,
+                stdout=subprocess.PIPE,
+                stderr=subprocess.PIPE,
+            )
+            log.info(f"Compressed {os.path.basename(input_video)}")
         except subprocess.CalledProcessError as e:
             log.error(f"Error compressing {input_video}: {e}")
 
     def compress_videos(self):
         for video in self.video_files:
             input_video = video
-            input_video_ext = os.path.splitext(video)[1]
 
-            output_video = video.replace(input_video_ext, self.progress_ext)
+            # filename.ext -> filename.compressing.ext
+            output_video = FileUtils.add_subextension(video, self.progress_ext)
+
+            # Compress
             self.compress_video(input_video, output_video)
 
+            # filename.compressing.ext -> filename.compressed.ext
             final_name = output_video.replace(self.progress_ext, self.complete_ext)
-
-            while os.path.exists(final_name):
-                final_name = final_name.replace(
-                    self.complete_ext,
-                    f"_{self.complete_ext}",
-                )
-
             os.rename(output_video, final_name)

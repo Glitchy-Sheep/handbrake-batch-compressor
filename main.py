@@ -3,6 +3,7 @@ import os
 import typer
 
 from src.batch_video_compressor import BatchVideoCompressor
+from src.file_utils import FileUtils
 from src.third_party_installers import setup_software
 from src.logger import log
 from src.videofiles_traverser import get_video_files_paths
@@ -27,18 +28,6 @@ def get_video_files(target_path):
     return video_files
 
 
-def find_incomplete_files(video_files: list[str], progress_ext: str) -> list[str]:
-    """
-    Find all files with the progress extension indicating
-    that they were not processed properly.
-    """
-    return [file for file in video_files if file.endswith(progress_ext)]
-
-
-def find_complete_files(video_files: list[str], complete_ext) -> list[str]:
-    return [file for file in video_files if file.endswith(complete_ext)]
-
-
 def remove_incomplete_files(incomplete_files) -> int:
     """
     Remove incomplete files and update the task queue.
@@ -55,28 +44,43 @@ def remove_incomplete_files(incomplete_files) -> int:
         log.success(f"Deleted {deleted_count} incomplete files.")
 
 
-def main(target_path, progress_ext="compressing.mp4", complete_ext="compressed.mp4"):
+def main(target_path, progress_ext="compressing", complete_ext="compressed"):
     check_target_path(target_path)
     setup_software()
+
+    if progress_ext.count(".") > 0 or complete_ext.count(".") > 0:
+        log.error("Progress and complete extensions cannot contain dots.")
+        return
 
     # All video files, unprocessed, processed and incomplete
     video_files = get_video_files(target_path)
 
-    # Completed files should be ignored as its originals
-    completed_files = find_complete_files(video_files, complete_ext)
+    complete_files = set()
+    incomplete_files = set()
+    unprocessed_files = set()
 
-    # All incomplete files should be deleted and ignored
-    incomplete_files = find_incomplete_files(video_files, progress_ext)
+    for file in video_files:
+        extensions = FileUtils.extension_set(file)
+        if complete_ext in extensions:
+            complete_files.add(file)
+        elif progress_ext in extensions:
+            incomplete_files.add(file)
+        else:
+            unprocessed_files.add(file)
 
-    remove_incomplete_files(incomplete_files)
+    for file in map(FileUtils.filename_with_original_extension, complete_files):
+        print(file)
+        unprocessed_files.discard(file)
 
-    unprocessed_files = [
-        file
-        for file in video_files
-        if file not in completed_files and file not in incomplete_files
-    ]
+    log.info(f"Found complete files: {len(complete_files)}")
+    log.info(f"Found incomplete files: {len(incomplete_files)}")
+    log.info(f"Found unprocessed files: {len(unprocessed_files)}")
 
-    compressor = BatchVideoCompressor(unprocessed_files)
+    compressor = BatchVideoCompressor(
+        unprocessed_files,
+        progress_ext=progress_ext,
+        complete_ext=complete_ext,
+    )
     compressor.compress_videos()
 
 
