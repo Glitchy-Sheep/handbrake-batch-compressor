@@ -1,6 +1,8 @@
 import os
+from typing import Annotated
 
 import typer
+import typer.rich_utils
 
 from src.batch_video_compressor import BatchVideoCompressor
 from src.file_utils import FileUtils
@@ -8,12 +10,20 @@ from src.third_party_installers import setup_software
 from src.logger import log
 from src.videofiles_traverser import get_video_files_paths
 
+app = typer.Typer(
+    no_args_is_help=True,
+    cls=True,
+    add_completion=False,
+    rich_help_panel=True,
+    rich_markup_mode="rich",
+)
+
 
 def check_target_path(target_path):
     target_path = os.path.abspath(target_path)
     if not os.path.isdir(target_path):
         log.error("Your target path is not a directory or doesn't exist")
-        return
+        exit(1)
 
 
 def get_video_files(target_path):
@@ -39,13 +49,64 @@ def remove_incomplete_files(incomplete_files) -> int:
             log.error(f"Failed to remove file {file}: {e}")
 
 
+@app.command()
 def main(
-    target_path: str,
-    progress_ext: str = "compressing",
-    complete_ext: str = "compressed",
-    delete_original_files: bool = False,
-    verbose: bool = False,
+    target_path: Annotated[
+        str,
+        typer.Option(
+            "--target-path",
+            "-t",
+            help="The path where your videos are.",
+        ),
+    ],
+    progress_ext: Annotated[
+        str,
+        typer.Option(
+            "--progress-extension",
+            "-p",
+            help="Extension which will be added to the file while processing it.",
+        ),
+    ] = "compressing",
+    complete_ext: Annotated[
+        str,
+        typer.Option(
+            "--complete-extension",
+            "-c",
+            help="Extension which will be added to the file when it's complete.",
+        ),
+    ] = "compressed",
+    delete_original_files: Annotated[
+        bool,
+        typer.Option(
+            "--delete-original-files",
+            "-d",
+            help="Should the original files be deleted after compression.",
+        ),
+    ] = False,
+    verbose: Annotated[
+        bool,
+        typer.Option(
+            "--verbose",
+            "-v",
+            help="Enable verbose mode. (Show all the HandbrakeCLI output)",
+            is_flag=True,
+        ),
+    ] = False,
 ):
+    """
+    This app can be used for [bold] batch compressing your video files using HandbrakeCLI. [/bold]
+
+    Just set --target-path to the path where your videos are.
+    And the utility will compress all the video files in it recursively.
+
+    Use --delete-original-files if you want to replace your original files with the compressed ones.
+    ⚠ [bold red] Beware! This is a dangerous operation, it deletes original videos right after compression. [/bold red]
+
+    The utility use file extension to skip already compressed videos.
+    You can customize it with --progress-extension and --complete-extension
+    But they should be unique and don't contain dots.
+    """
+
     check_target_path(target_path)
     setup_software()
 
@@ -92,4 +153,4 @@ def main(
 
 
 if __name__ == "__main__":
-    typer.run(main)
+    app()
