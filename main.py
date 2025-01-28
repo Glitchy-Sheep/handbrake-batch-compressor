@@ -5,6 +5,7 @@ import typer
 import typer.rich_utils
 
 from src.batch_video_compressor import BatchVideoCompressor
+from src.cli_guards import check_extensions_arguments, check_target_path
 from src.file_utils import FileUtils
 from src.third_party_installers import setup_software
 from src.logger import log
@@ -17,13 +18,6 @@ app = typer.Typer(
     rich_help_panel=True,
     rich_markup_mode="rich",
 )
-
-
-def check_target_path(target_path):
-    target_path = os.path.abspath(target_path)
-    if not os.path.isdir(target_path):
-        log.error("Your target path is not a directory or doesn't exist")
-        exit(1)
 
 
 def get_video_files(target_path):
@@ -47,20 +41,6 @@ def remove_incomplete_files(incomplete_files) -> int:
             os.remove(file)
         except OSError as e:
             log.error(f"Failed to remove file {file}: {e}")
-
-
-def check_extensions_arguments(progress_ext, complete_ext):
-    if progress_ext.count(".") > 0 or complete_ext.count(".") > 0:
-        log.error("Progress and complete extensions cannot contain dots.")
-        exit(1)
-
-    if progress_ext == complete_ext:
-        log.error("Progress and complete extensions cannot be the same.")
-        exit(1)
-
-    if len(progress_ext) == 0 or len(complete_ext) == 0:
-        log.error("Progress and complete extensions cannot be empty.")
-        exit(1)
 
 
 @app.command()
