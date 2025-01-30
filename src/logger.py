@@ -35,5 +35,9 @@ class AppLogger:
         if should_log:
             self._log.info(f"⏳ {msg}")
 
+    def skip_lines(self, count):
+        for _ in range(count):
+            print("")
+
 
 log = AppLogger()

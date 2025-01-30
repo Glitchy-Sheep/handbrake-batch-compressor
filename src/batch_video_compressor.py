@@ -47,16 +47,20 @@ class BatchVideoCompressor:
             *split(self.handbrake_cli_options, " "),
         ]
 
-        try:
-            log.wait(f"Compressing {input_video}...", should_log=not self.verbose)
+        log.wait(f"Compressing {input_video}...", should_log=not self.verbose)
+
+        stderr_log_filename = "last_compression.log"
+
+        with open(stderr_log_filename, "w+", encoding="utf-8") as last_compression_log:
             handbrakecli = subprocess.Popen(
                 compress_cmd,
                 shell=True,
                 stdout=subprocess.PIPE,
-                stderr=subprocess.DEVNULL,
+                stderr=last_compression_log,
                 text=True,
                 bufsize=1,
                 universal_newlines=True,
+                encoding="utf-8",
             )
 
             for line in handbrakecli.stdout:
@@ -65,25 +69,31 @@ class BatchVideoCompressor:
 
             handbrakecli.wait()
 
-            log.success(
-                f"Compressed {os.path.basename(input_video)}!",
-                should_log=not self.verbose,
-            )
-        except subprocess.CalledProcessError as e:
-            log.error(
-                dedent(
-                    f"""
-                    HANDBRAKECLI throw an error for {input_video}
-                    {
-                        "Try to run the same command with -v for more info" 
-                        if not self.verbose 
-                        else "You can read the error details above"
-                    }
-                    """,
-                )
-            )
+        # For some reason handbrakecli doesn't set return code to non zero value on errors
+        # it's literally zero even on invalid video encoder value
+        # so the only way to detect errors is to check stderr for ERROR tag.
+        with open(stderr_log_filename, "r", encoding="utf-8") as errlog:
+            for line in errlog.readlines():
+                if "ERROR" in line:
+                    log.skip_lines(4)
+                    log.error(
+                        f"HANDBRAKECLI got an error for file: '{os.path.basename(input_video)}'\n"
+                        f"Please see the last_compression.log file for more details.\n"
+                        "Or see the short help message below:\n"
+                        "\n"
+                        f"{line}"
+                        "\n"
+                        "Handbrake CLI command was: \n"
+                        "\n"
+                        f"{compress_cmd}"
+                    )
 
-            exit(1)
+                    exit(1)
+
+        log.success(
+            f"Compressed {os.path.basename(input_video)}!",
+            should_log=not self.verbose,
+        )
 
     def compress_videos(self):
         with Progress(
