@@ -11,6 +11,26 @@ class HandbrakeProgressInfo(BaseModel):
     fps_average: Optional[float]
     eta: Optional[datetime.timedelta]
 
+    def __str__(self):
+        return (
+            (
+                f"Progress: {self.progress:.2f}%"
+                if self.progress is not None
+                else "Progress: N/A"
+            )
+            + (
+                f" - FPS: {self.fps_current:.2f}"
+                if self.fps_current is not None
+                else ""
+            )
+            + (
+                f" - Average FPS: {self.fps_average:.2f}"
+                if self.fps_average is not None
+                else ""
+            )
+            + (f" - ETA: {self.eta}" if self.eta is not None else "")
+        )
+
 
 def parse_handbrake_cli_output(line: str) -> HandbrakeProgressInfo:
     # Extract percentage
