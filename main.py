@@ -27,12 +27,8 @@ app = typer.Typer(
 def get_video_files(target_path):
     log.wait("Collecting all your video files...")
     video_files = set(get_video_files_paths(target_path))
+    return video_files
 
-    if len(video_files) == 0:
-        log.error("No video files found.")
-        return
-
-    log.success(f"Found {len(video_files)} video files.")
     return video_files
 
 
@@ -129,6 +125,12 @@ def main(
 
     # All video files, unprocessed, processed and incomplete
     video_files = get_video_files(target_path)
+
+    if len(video_files) == 0:
+        log.success("No video files found. - Nothing to do.")
+        exit(1)
+
+    log.success(f"Found {len(video_files)} video files.")
 
     complete_files = set()
     incomplete_files = set()
