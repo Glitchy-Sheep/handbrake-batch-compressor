@@ -22,4 +22,5 @@ build-backend = "poetry.core.masonry.api"
 [tool.poetry.group.dev.dependencies]
 pytest = "^8.3.4"
 pyinstaller = "^6.11.1"
+ruff = "^0.9.4"
 

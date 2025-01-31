@@ -1,18 +1,16 @@
 import os
 import subprocess
-
 from shlex import split
-from textwrap import dedent
-from rich.progress import Progress
 from typing import Callable
 
+from rich.progress import Progress
 
 from src.file_utils import FileUtils
-from src.logger import log
 from src.handbrake_cli_output_capturer import (
     HandbrakeProgressInfo,
     parse_handbrake_cli_output,
 )
+from src.logger import log
 
 
 class BatchVideoCompressor:
@@ -140,6 +138,6 @@ class BatchVideoCompressor:
                 progress.update(
                     all_videos_task,
                     advance=1,
-                    description=f"Compressing videos ({idx+1}/{len(self.video_files)}) {int((idx+1) / len(self.video_files) * 100)}%",
+                    description=f"Compressing videos ({idx + 1}/{len(self.video_files)}) {int((idx + 1) / len(self.video_files) * 100)}%",
                     refresh=True,
                 )

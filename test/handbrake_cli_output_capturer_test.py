@@ -6,7 +6,6 @@ from src.handbrake_cli_output_capturer import (
 
 
 class TestHandbrakeCliOutputCapturer:
-
     def test_with_sufficient_data(self):
         handbrake_cli_output = (
             "Encoding: task 1 of 1, 4.00 % (937.13 fps, avg 955.64 fps, ETA 00h03m22s)"

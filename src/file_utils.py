@@ -97,4 +97,6 @@ class FileUtils:
         if first_dot == last_dot:
             return os.path.join(parent, filename)
 
-        return os.path.join(parent, f"{filename[:first_dot]}.{filename[last_dot+1:]}")
+        return os.path.join(
+            parent, f"{filename[:first_dot]}.{filename[last_dot + 1 :]}"
+        )
