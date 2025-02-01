@@ -3,7 +3,7 @@ name = "batch-video-compressor"
 version = "0.1.0"
 description = "Simple script to traverse all the video files and compress them to optimize disk space for large files"
 authors = [
-    {name = "Roman Berezkin",email = "Glitchy-Sheep@users.noreply.github.com"}
+    { name = "Roman Berezkin", email = "Glitchy-Sheep@users.noreply.github.com" },
 ]
 readme = "README.md"
 requires-python = ">=3.10,<3.14"
@@ -11,7 +11,7 @@ dependencies = [
     "typer (>=0.15.1,<0.16.0)",
     "pydantic (>=2.10.6,<3.0.0)",
     "av (>=14.1.0,<15.0.0)",
-    "numpy (>=2.2.2,<3.0.0)"
+    "numpy (>=2.2.2,<3.0.0)",
 ]
 
 
@@ -24,3 +24,21 @@ pytest = "^8.3.4"
 pyinstaller = "^6.11.1"
 ruff = "^0.9.4"
 
+# ---------------- RUFF Linter ---------------- 
+[tool.ruff]
+# match black
+line-length = 120
+select = [
+    "ALL", # include all the rules, including new ones
+]
+ignore = [
+    "E501", # line too long    
+    "D102", # missing docstring in public method
+    "D212", # multiline docstring should start at the first line (personal preference)
+    "D107", # missing docstring in __init__ (lol why)
+    "D400", # first line should end with a period (sometimes mess with markdown or code blocks)
+    "D415", # first line should end with a period (same as above but trickier)
+]
+
+[tool.ruff.lint.per-file-ignores]
+"test/*" = ["D", "ANN201", "S101", "PLR2004"]
