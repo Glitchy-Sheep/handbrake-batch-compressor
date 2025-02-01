@@ -1,6 +1,11 @@
+"""
+The module provides a function to parse Handbrake CLI output and return a HandbrakeProgressInfo object.
+
+This object contains the progress, current FPS, average FPS, and ETA.
+"""
+
 import datetime
 import re
-from typing import Optional
 
 from pydantic import BaseModel
 
@@ -8,34 +13,14 @@ from pydantic import BaseModel
 class HandbrakeProgressInfo(BaseModel):
     """Model representing the progress information captured from Handbrake CLI output."""
 
-    progress: Optional[float]
-    fps_current: Optional[float]
-    fps_average: Optional[float]
-    eta: Optional[datetime.timedelta]
-
-    def __str__(self):
-        return (
-            (
-                f"Progress: {self.progress:.2f}%"
-                if self.progress is not None
-                else "Progress: N/A"
-            )
-            + (
-                f" - FPS: {self.fps_current:.2f}"
-                if self.fps_current is not None
-                else ""
-            )
-            + (
-                f" - Average FPS: {self.fps_average:.2f}"
-                if self.fps_average is not None
-                else ""
-            )
-            + (f" - ETA: {self.eta}" if self.eta is not None else "")
-        )
+    progress: float | None
+    fps_current: float | None
+    fps_average: float | None
+    eta: datetime.timedelta | None
 
 
 def parse_handbrake_cli_output(line: str) -> HandbrakeProgressInfo:
-    """Parses a line of Handbrake CLI output and returns a HandbrakeProgressInfo object."""
+    """Parse a line of Handbrake CLI output and returns a HandbrakeProgressInfo object."""
     # Extract percentage
     progress_match = re.search(r"(\d+\.\d+) %", line)
     progress = float(progress_match.group(1)) if progress_match else None

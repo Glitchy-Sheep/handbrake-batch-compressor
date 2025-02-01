@@ -39,23 +39,3 @@ class TestHandbrakeCliOutputCapturer:
         assert progress_info.fps_current is None
         assert progress_info.fps_average is None
         assert progress_info.eta is None
-
-    def test_str_representation(self):
-        progress_info = parse_handbrake_cli_output(
-            "Encoding: task 1 of 1, 4.00 % (937.13 fps, avg 955.64 fps, ETA 00h03m22s)"
-        )
-        assert (
-            str(progress_info)
-            == "Progress: 4.00% - FPS: 937.13 - Average FPS: 955.64 - ETA: 0:03:22"
-        )
-
-        progress_info = parse_handbrake_cli_output(
-            "Encoding: task 1 of 1, 100.00 % (0 fps, avg 0 fps, ETA 00h00m00s)"
-        )
-        assert (
-            str(progress_info)
-            == "Progress: 100.00% - FPS: 0.00 - Average FPS: 0.00 - ETA: 0:00:00"
-        )
-
-        progress_info = parse_handbrake_cli_output("Encoding: task 1 of 1, 12.00 % ")
-        assert str(progress_info) == "Progress: 12.00%"

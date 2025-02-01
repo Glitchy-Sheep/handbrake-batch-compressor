@@ -1,4 +1,7 @@
-import os
+"""Main module for the video compressor and the entry point for the CLI."""
+
+import sys
+from pathlib import Path
 from typing import Annotated
 
 import typer
@@ -10,7 +13,6 @@ from src.cli_guards import (
     check_handbrakecli_options,
     check_target_path,
 )
-from src.file_utils import FileUtils
 from src.logger import log
 from src.third_party_installers import setup_software
 from src.videofiles_traverser import get_video_files_paths
@@ -24,29 +26,23 @@ app = typer.Typer(
 )
 
 
-def get_video_files(target_path):
-    log.wait("Collecting all your video files...")
-    video_files = set(get_video_files_paths(target_path))
-    return video_files
-
-    return video_files
-
-
-def remove_incomplete_files(incomplete_files) -> int:
-    """
-    Remove incomplete files and update the task queue.
-    """
+def remove_incomplete_files(incomplete_files: set[str]) -> int:
+    """Remove incomplete files and update the task queue."""
     for file in incomplete_files:
-        try:
-            os.remove(file)
-        except OSError as e:
-            log.error(f"Failed to remove file {file}: {e}")
+        file_path = Path(file)
+        if file_path.exists():
+            try:
+                file_path.unlink()
+            except OSError as e:
+                log.error(f"Failed to remove file {file}: {e}")
+        else:
+            log.warning(f"File {file} does not exist, skipping.")
 
 
 @app.command()
 def main(
     target_path: Annotated[
-        str,
+        Path,
         typer.Option(
             "--target-path",
             "-t",
@@ -77,6 +73,7 @@ def main(
             help="Extension which will be added to the file when it's complete.",
         ),
     ] = "compressed",
+    *,
     delete_original_files: Annotated[
         bool,
         typer.Option(
@@ -85,29 +82,27 @@ def main(
             help="Should the original files be deleted after compression.",
         ),
     ] = False,
-):
+) -> None:
     """
-    This app can be used for [bold] batch compressing your video files using HandbrakeCLI. [/bold]
+    Compress your video files in batch with HandbrakeCLI.
 
-    Just set --target-path to the path where your videos are.
-    And the utility will compress all the video files in it recursively.
+    1. Set `--target-path` to the directory containing your videos.
+    2. The utility will compress all video files in it recursively.
 
-    Use --delete-original-files if you want to replace your original files with the compressed ones.
-    ⚠ [bold red] Beware! This is a dangerous operation, it deletes original videos right after compression. [/bold red]
+    Use `--delete-original-files` to replace the original files with compressed ones.
+    ⚠ [bold red]Be cautious![/bold red] This deletes the original videos right after compression.
 
-    The utility use file extension to skip already compressed videos.
-    You can customize it with --progress-extension and --complete-extension
-    But they should be unique and don't contain dots.
+    The utility uses file extensions to skip already compressed videos.
+    Customize with `--progress-extension` and `--complete-extension` (ensure they are unique and do not contain dots).
 
-    [bold green] Examples: [/bold green]
-        1. Compress all the videos in ./videos and delete original files with handbrakecli output:
-            [bold]- ./main.py -t ./videos -d[/bold]
-        2. Compress files with choosing encoder and quality:
-            [bold]- ./main.py -t ./videos --handbrakecli-options "--encoder qsv_h264 --quality 20"[bold]
-        3. Compress files using a preset:
-            [bold]- ./main.py -t ./videos --handbrakecli-options "--preset 'Fast 720p30'"[bold]
+    [bold green]Examples:[/bold green]
+    1. Compress all videos in `./videos` and delete originals:
+    - [bold] ./main.py -t ./videos -d [/bold]
+    2. Compress files with custom encoder and quality:
+    - [bold] ./main.py -t ./videos --handbrakecli-options "--encoder qsv_h264 --quality 20" [/bold]
+    3. Compress using a preset:
+    - [bold] ./main.py -t ./videos --handbrakecli-options "--preset 'Fast 720p30'" [/bold]
     """
-
     check_target_path(target_path)
     check_extensions_arguments(progress_ext, complete_ext)
     check_handbrakecli_options(handbrakecli_options)
@@ -115,11 +110,12 @@ def main(
     setup_software()
 
     # All video files, unprocessed, processed and incomplete
-    video_files = get_video_files(target_path)
+    log.wait("Collecting all your video files...")
+    video_files = set(get_video_files_paths(target_path))
 
     if len(video_files) == 0:
         log.success("No video files found. - Nothing to do.")
-        exit(1)
+        sys.exit(1)
 
     log.success(f"Found {len(video_files)} video files.")
 
@@ -128,7 +124,7 @@ def main(
     unprocessed_files = set()
 
     for file in video_files:
-        extensions = FileUtils.extension_set(file)
+        extensions = {x.replace(".", "") for x in file.suffixes}
         if complete_ext in extensions:
             complete_files.add(file)
         elif progress_ext in extensions:
@@ -136,8 +132,13 @@ def main(
         else:
             unprocessed_files.add(file)
 
-    for file in map(FileUtils.filename_with_original_extension, complete_files):
-        unprocessed_files.discard(file)
+    # Remove complete files from unprocessed
+    for original_file in (
+        # filename.complete_ext.ext -> filename.ext
+        x.parent / f"{x.stem.replace(f".{complete_ext}", '')}{x.suffix}"
+        for x in complete_files
+    ):
+        unprocessed_files.discard(original_file)
 
     log.info(f"Found complete files: {len(complete_files)}")
     log.info(f"Found incomplete files: {len(incomplete_files)}")

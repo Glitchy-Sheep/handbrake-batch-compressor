@@ -1,5 +1,8 @@
+"""Get all video files paths (recursively) in a directory using known video file extensions."""
+
 import os
-from typing import Generator
+from collections.abc import Generator
+from pathlib import Path
 
 supported_videofile_extensions = {
     "mp4",
@@ -15,10 +18,8 @@ supported_videofile_extensions = {
 
 
 def get_video_files_paths(path: str) -> Generator[str, None, None]:
-    """
-    Get all video files paths in a directory
-    """
+    """Get all video files paths in a directory."""
     for root, _, files in os.walk(path):
         for file in files:
             if file.endswith(tuple(supported_videofile_extensions)):
-                yield os.path.abspath(os.path.join(root, file))
+                yield (Path(root) / file).absolute()
