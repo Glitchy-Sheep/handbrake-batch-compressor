@@ -1,7 +1,7 @@
 import logging
 
-from rich.logging import RichHandler
 from rich.console import Console
+from rich.logging import RichHandler
 
 _console = Console()
 
@@ -37,7 +37,7 @@ class AppLogger:
 
     def skip_lines(self, count):
         for _ in range(count):
-            print("")
+            print("\n" * count, end="")
 
 
 log = AppLogger()

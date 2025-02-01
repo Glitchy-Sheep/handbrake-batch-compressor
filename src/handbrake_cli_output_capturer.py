@@ -1,11 +1,14 @@
-import re
 import datetime
+import re
+from typing import Optional
 
 from pydantic import BaseModel
-from typing import Optional
 
 
 class HandbrakeProgressInfo(BaseModel):
+    '''
+    Model representing the progress information captured from Handbrake CLI output.
+    '''
     progress: Optional[float]
     fps_current: Optional[float]
     fps_average: Optional[float]
@@ -33,6 +36,9 @@ class HandbrakeProgressInfo(BaseModel):
 
 
 def parse_handbrake_cli_output(line: str) -> HandbrakeProgressInfo:
+    '''
+    Parses a line of Handbrake CLI output and returns a HandbrakeProgressInfo object.
+    '''
     # Extract percentage
     progress_match = re.search(r"(\d+\.\d+) %", line)
     progress = float(progress_match.group(1)) if progress_match else None
