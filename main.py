@@ -11,8 +11,8 @@ from src.cli_guards import (
     check_target_path,
 )
 from src.file_utils import FileUtils
-from src.third_party_installers import setup_software
 from src.logger import log
+from src.third_party_installers import setup_software
 from src.videofiles_traverser import get_video_files_paths
 
 app = typer.Typer(
@@ -85,15 +85,6 @@ def main(
             help="Should the original files be deleted after compression.",
         ),
     ] = False,
-    verbose: Annotated[
-        bool,
-        typer.Option(
-            "--verbose",
-            "-v",
-            help="Enable verbose mode. (Show all the HandbrakeCLI output)",
-            is_flag=True,
-        ),
-    ] = False,
 ):
     """
     This app can be used for [bold] batch compressing your video files using HandbrakeCLI. [/bold]
@@ -110,11 +101,11 @@ def main(
 
     [bold green] Examples: [/bold green]
         1. Compress all the videos in ./videos and delete original files with handbrakecli output:
-            [bold]- ./main.py -t ./videos -v -d[/bold]
+            [bold]- ./main.py -t ./videos -d[/bold]
         2. Compress files with choosing encoder and quality:
-            [bold]- ./main.py -t ./videos -v --handbrakecli-options "--encoder qsv_h264 --quality 20"[bold]
+            [bold]- ./main.py -t ./videos --handbrakecli-options "--encoder qsv_h264 --quality 20"[bold]
         3. Compress files using a preset:
-            [bold]- ./main.py -t ./videos -v --handbrakecli-options "--preset 'Fast 720p30'"[bold]
+            [bold]- ./main.py -t ./videos --handbrakecli-options "--preset 'Fast 720p30'"[bold]
     """
 
     check_target_path(target_path)
@@ -158,7 +149,6 @@ def main(
 
     compressor = BatchVideoCompressor(
         delete_original_files=delete_original_files,
-        verbose=verbose,
         video_files=unprocessed_files,
         progress_ext=progress_ext,
         complete_ext=complete_ext,

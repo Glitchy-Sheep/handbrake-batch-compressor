@@ -1,4 +1,5 @@
 import os
+
 from src.file_utils import FileUtils
 
 
@@ -19,12 +20,12 @@ class TestBaseName:
 class TestExtensionSet:
     def test_extension_set_with_extension(self):
         assert FileUtils.extension_set(os.path.join("path", "to", "file.mp4")) == {
-            "mp4"
+            "mp4",
         }
 
     def test_extension_set_with_multiple_extensions(self):
         assert FileUtils.extension_set(
-            os.path.join("path", "to", "file.mp4.extra")
+            os.path.join("path", "to", "file.mp4.extra"),
         ) == {"mp4", "extra"}
 
     def test_extension_set_without_extension(self):
@@ -54,7 +55,8 @@ class TestLastExtension:
 class TestAddSubextension:
     def test_add_subextension(self):
         assert FileUtils.add_subextension(
-            os.path.join("path", "to", "file.mp4"), "extra"
+            os.path.join("path", "to", "file.mp4"),
+            "extra",
         ) == os.path.join("path", "to", "file.extra.mp4")
 
     def test_add_subextension_without_extension(self):
@@ -67,12 +69,12 @@ class TestAddSubextension:
 class TestFilenameWithOriginalExtension:
     def test_filename_with_original_extension(self):
         assert FileUtils.filename_with_original_extension(
-            os.path.join("path", "to", "file.extra.mp4")
+            os.path.join("path", "to", "file.extra.mp4"),
         ) == os.path.join("path", "to", "file.mp4")
 
     def test_filename_with_original_extension_with_one_ext(self):
         assert FileUtils.filename_with_original_extension(
-            os.path.join("path", "to", "file.mp4")
+            os.path.join("path", "to", "file.mp4"),
         ) == os.path.join("path", "to", "file.mp4")
 
     def test_filename_with_original_extension_without_extension(self):

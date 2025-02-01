@@ -36,9 +36,9 @@ class TestHandbrakeCliOutputCapturer:
         progress_info = parse_handbrake_cli_output(handbrake_cli_output)
 
         assert progress_info.progress == 12.00
-        assert progress_info.fps_current == None
-        assert progress_info.fps_average == None
-        assert progress_info.eta == None
+        assert progress_info.fps_current is None
+        assert progress_info.fps_average is None
+        assert progress_info.eta is None
 
     def test_str_representation(self):
         progress_info = parse_handbrake_cli_output(

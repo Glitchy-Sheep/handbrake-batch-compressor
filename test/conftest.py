@@ -1,6 +1,5 @@
 import os
 import shutil
-import time
 from typing import Generator
 from pydantic import BaseModel
 import pytest

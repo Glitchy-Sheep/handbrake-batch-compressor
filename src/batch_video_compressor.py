@@ -16,7 +16,6 @@ from src.logger import log
 class BatchVideoCompressor:
     def __init__(
         self,
-        verbose: bool,
         delete_original_files: bool,
         video_files: set[str],
         progress_ext="compressing",
@@ -26,7 +25,6 @@ class BatchVideoCompressor:
         self.progress_ext = progress_ext
         self.complete_ext = complete_ext
         self.video_files = video_files
-        self.verbose = verbose
         self.delete_original_files = delete_original_files
         self.handbrake_cli_options = handbrakecli_options
 
@@ -44,8 +42,6 @@ class BatchVideoCompressor:
             output_video,
             *split(self.handbrake_cli_options, " "),
         ]
-
-        log.wait(f"Compressing {input_video}...", should_log=not self.verbose)
 
         stderr_log_filename = "last_compression.log"
 
@@ -70,7 +66,7 @@ class BatchVideoCompressor:
         # For some reason handbrakecli doesn't set return code to non zero value on errors
         # it's literally zero even on invalid video encoder value
         # so the only way to detect errors is to check stderr for ERROR tag.
-        with open(stderr_log_filename, "r", encoding="utf-8") as errlog:
+        with open(stderr_log_filename, encoding="utf-8") as errlog:
             for line in errlog.readlines():
                 if "ERROR" in line:
                     log.skip_lines(4)
@@ -83,21 +79,16 @@ class BatchVideoCompressor:
                         "\n"
                         "Handbrake CLI command was: \n"
                         "\n"
-                        f"{compress_cmd}"
+                        f"{compress_cmd}",
                     )
 
                     exit(1)
-
-        log.success(
-            f"Compressed {os.path.basename(input_video)}!",
-            should_log=not self.verbose,
-        )
 
     def compress_videos(self):
         with Progress(
             console=log.console,
             transient=True,
-            refresh_per_second=4 if self.verbose else 1,
+            refresh_per_second=1,
         ) as progress:
             all_videos_task = progress.add_task(
                 description=f"Compressing videos (0/{len(self.video_files)}) 0%",
