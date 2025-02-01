@@ -1,31 +1,46 @@
-import os
+"""The module provides functions to check if the arguments passed to the CLI are valid."""
 
-from src.logger import log
+import sys
+from pathlib import Path
 from textwrap import dedent
 
+from src.logger import log
 
-def check_target_path(target_path):
-    target_path = os.path.abspath(target_path)
-    if not os.path.isdir(target_path):
+
+def check_target_path(target_path: Path) -> None:
+    """Check if the target path is a directory and exists otherwise exits."""
+    if not target_path.is_dir():
         log.error("Your target path is not a directory or doesn't exist")
-        exit(1)
+        sys.exit(1)
 
 
-def check_extensions_arguments(progress_ext, complete_ext):
+def check_extensions_arguments(progress_ext: str, complete_ext: str) -> None:
+    """
+    Check if the progress and complete extensions are valid otherwise exits.
+
+    Valid extensions:
+        - No dots
+        - No empty
+    """
     if progress_ext.count(".") > 0 or complete_ext.count(".") > 0:
         log.error("Progress and complete extensions cannot contain dots.")
-        exit(1)
+        sys.exit(1)
 
     if progress_ext == complete_ext:
         log.error("Progress and complete extensions cannot be the same.")
-        exit(1)
+        sys.exit(1)
 
     if len(progress_ext) == 0 or len(complete_ext) == 0:
         log.error("Progress and complete extensions cannot be empty.")
-        exit(1)
+        sys.exit(1)
 
 
-def check_handbrakecli_options(handbrakecli_options):
+def check_handbrakecli_options(handbrakecli_options: str) -> None:
+    """
+    Check if the handbrakecli options are valid otherwise exits.
+
+    Options are generally valid if they are not input/output options.
+    """
     if (
         "-i" in handbrakecli_options
         or "-o" in handbrakecli_options
@@ -37,7 +52,7 @@ def check_handbrakecli_options(handbrakecli_options):
                 """
             You should not use input/output handbrakecli options, it will fail the process.
             The utility will automatically add them for you.
-            """
-            )
+            """,
+            ),
         )
-        exit(1)
+        sys.exit(1)
