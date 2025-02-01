@@ -1,0 +1,63 @@
+import datetime
+import re
+from typing import Optional
+
+from pydantic import BaseModel
+
+
+class HandbrakeProgressInfo(BaseModel):
+    """Model representing the progress information captured from Handbrake CLI output."""
+
+    progress: Optional[float]
+    fps_current: Optional[float]
+    fps_average: Optional[float]
+    eta: Optional[datetime.timedelta]
+
+    def __str__(self):
+        return (
+            (
+                f"Progress: {self.progress:.2f}%"
+                if self.progress is not None
+                else "Progress: N/A"
+            )
+            + (
+                f" - FPS: {self.fps_current:.2f}"
+                if self.fps_current is not None
+                else ""
+            )
+            + (
+                f" - Average FPS: {self.fps_average:.2f}"
+                if self.fps_average is not None
+                else ""
+            )
+            + (f" - ETA: {self.eta}" if self.eta is not None else "")
+        )
+
+
+def parse_handbrake_cli_output(line: str) -> HandbrakeProgressInfo:
+    """Parses a line of Handbrake CLI output and returns a HandbrakeProgressInfo object."""
+    # Extract percentage
+    progress_match = re.search(r"(\d+\.\d+) %", line)
+    progress = float(progress_match.group(1)) if progress_match else None
+
+    # Get current FPS
+    fps_current_match = re.search(r"([\d.]+) fps", line)
+    fps_current = float(fps_current_match.group(1)) if fps_current_match else None
+
+    # Get Average FPS
+    fps_avg_match = re.search(r"avg ([\d.]+) fps", line)
+    fps_avg = float(fps_avg_match.group(1)) if fps_avg_match else None
+
+    # Extract ETA
+    eta_match = re.search(r"ETA (\d+h\d+m\d+s)", line)
+    eta = None
+    if eta_match:
+        h, m, s = map(int, re.findall(r"\d+", eta_match.group(1)))
+        eta = datetime.timedelta(hours=h, minutes=m, seconds=s)
+
+    return HandbrakeProgressInfo(
+        progress=progress,
+        fps_current=fps_current,
+        fps_average=fps_avg,
+        eta=eta,
+    )

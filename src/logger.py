@@ -1,7 +1,7 @@
 import logging
 
-from rich.logging import RichHandler
 from rich.console import Console
+from rich.logging import RichHandler
 
 _console = Console()
 
@@ -34,6 +34,10 @@ class AppLogger:
     def wait(self, msg, should_log=True):
         if should_log:
             self._log.info(f"⏳ {msg}")
+
+    def skip_lines(self, count):
+        for _ in range(count):
+            print("\n" * count, end="")
 
 
 log = AppLogger()
