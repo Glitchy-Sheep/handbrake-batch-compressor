@@ -1,17 +1,32 @@
 """Logger for the application."""
 
+import io
 import logging
+import sys
 
 from rich.console import Console
 from rich.logging import RichHandler
 
-_console = Console()
+is_terminal = sys.stdout.isatty()
+sys.stdout = io.TextIOWrapper(
+    sys.stdout.detach() if is_terminal else sys.stdout,
+    encoding='utf-8',
+    line_buffering=True,
+)
+
+_console = Console(log_path=False)
 
 logging.basicConfig(
     level=logging.INFO,
     format='%(levelname)s %(message)s',
     handlers=[
-        RichHandler(console=_console, show_path=False),
+        logging.StreamHandler()
+        if is_terminal
+        else RichHandler(
+            console=_console,
+            show_path=False,
+            markup=True,
+        ),
     ],
 )
 
@@ -23,21 +38,45 @@ class AppLogger:
         self._log = logging.getLogger(__name__)
         self.console = _console
 
-    def info(self, msg: str, *, should_log: bool = True) -> None:
+    def info(
+        self,
+        msg: str,
+        *,
+        should_log: bool = True,
+        highlight: bool = True,
+    ) -> None:
         if should_log:
-            self._log.info(f'ℹ {msg}')
+            self.console.log(f'ℹ {msg}', highlight=highlight)
 
-    def success(self, msg: str, *, should_log: bool = True) -> None:
+    def success(
+        self,
+        msg: str,
+        *,
+        should_log: bool = True,
+        highlight: bool = True,
+    ) -> None:
         if should_log:
-            self._log.info(f'✔ {msg}')
+            self.console.log(f'✔ {msg}', highlight=highlight)
 
-    def error(self, msg: str, *, should_log: bool = True) -> None:
+    def error(
+        self,
+        msg: str,
+        *,
+        should_log: bool = True,
+        highlight: bool = True,
+    ) -> None:
         if should_log:
-            self._log.error(f'❌ {msg}')
+            self.console.log(f'❌ {msg}', highlight=highlight)
 
-    def wait(self, msg: str, *, should_log: bool = True) -> None:
+    def wait(
+        self,
+        msg: str,
+        *,
+        should_log: bool = True,
+        highlight: bool = True,
+    ) -> None:
         if should_log:
-            self._log.info(f'⏳ {msg}')
+            self.console.log(f'⏳ {msg}', highlight=highlight)
 
     def skip_lines(self, count: int) -> None:
         self.console.print('\n' * count, end='')
