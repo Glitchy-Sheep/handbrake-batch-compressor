@@ -20,8 +20,11 @@ from collections.abc import Callable
 from pathlib import Path
 from shlex import split
 
+from rich.markup import escape
 from rich.progress import Progress
 
+from src.compression_statistics import CompressionStatistics, FileStatistics
+from src.files import human_readable_size
 from src.handbrake_cli_output_capturer import (
     HandbrakeProgressInfo,
     parse_handbrake_cli_output,
@@ -46,6 +49,38 @@ class BatchVideoCompressor:
         self.video_files = video_files
         self.delete_original_files = delete_original_files
         self.handbrake_cli_options = handbrakecli_options
+
+        self.statistics = CompressionStatistics()
+
+    def log_stats(self, info: FileStatistics | None = None) -> None:
+        """Log the compression stats for the given file or overall stats if info is not provided."""
+        # Determine stats based on input (file-specific or overall)
+        stats = info if info else self.statistics.overall_stats
+
+        # Format compression rate and sizes
+        is_positive = '+' not in stats.compression_rate
+        color = 'green' if is_positive else 'red'
+        bold = ' bold' if is_positive else ''
+
+        compression_rate = (
+            f'[{color}{bold}]{escape(stats.compression_rate)}[/{color}{bold}]'
+        )
+        init_size = (
+            f'[{color}]{human_readable_size(stats.initial_size_bytes)}[/{color}]'
+        )
+        final_size = f'[{color}]{human_readable_size(stats.final_size_bytes)}[/{color}]'
+
+        # Log the message, adjusting for file path if necessary
+        if info:
+            log.success(
+                f'Compressed {info.path.name} (size: {init_size} -> {final_size}) {compression_rate}',
+                highlight=False,
+            )
+        else:
+            log.success(
+                f'Overall stats: {compression_rate} (size: {init_size} -> {final_size})',
+                highlight=False,
+            )
 
     def compress_video(
         self,
@@ -108,16 +143,19 @@ class BatchVideoCompressor:
                 log.skip_lines(3)
                 log.error(
                     f"HANDBRAKECLI got an error for file: '{input_video.name}'\n"
-                    f"Please see the last_compression.log file for more details.\n"
-                    "\n"
-                    "Handbrake CLI command was: \n"
-                    "\n"
-                    f"{compress_cmd}",
+                    f'Please see the last_compression.log file for more details.\n'
+                    '\n'
+                    'Handbrake CLI command was: \n'
+                    '\n'
+                    f'{compress_cmd}',
                 )
                 if error_line:
                     log.error('Last Handbrake CLI error (from log file):')
                     log.error(error_line)
                 sys.exit(1)
+
+        stats = self.statistics.add_compression_info(input_video, output_video)
+        self.log_stats(stats)
 
     def compress_videos(self) -> None:
         """Traverse all the video files and compress them, removing incomplete ones."""
@@ -140,7 +178,9 @@ class BatchVideoCompressor:
                 input_video = video
 
                 # filename.ext -> filename.compressing.ext
-                output_video = (video.parent / f'{video.stem}.{self.progress_ext}{video.suffix}').absolute()
+                output_video = (
+                    video.parent / f'{video.stem}.{self.progress_ext}{video.suffix}'
+                ).absolute()
 
                 # Compress
                 self.compress_video(
@@ -149,7 +189,7 @@ class BatchVideoCompressor:
                     on_update=lambda info, task=current_compression: progress.update(
                         task_id=task,
                         completed=info.progress,
-                        description=f"[italic]FPS: {info.fps_current or ''}[/italic] - [underline] Average FPS: {info.fps_average or ''}",
+                        description=f'[italic]FPS: {info.fps_current or ""}[/italic] - [underline] Average FPS: {info.fps_average or ""}',
                     ),
                 )
 
@@ -171,3 +211,5 @@ class BatchVideoCompressor:
                     description=f'Compressing videos ({idx + 1}/{len(self.video_files)}) {int((idx + 1) / len(self.video_files) * 100)}%',
                     refresh=True,
                 )
+            if len(self.video_files) > 0:
+                self.log_stats()
