@@ -13,8 +13,10 @@ from src.cli_guards import (
     check_handbrakecli_options,
     check_target_path,
 )
+from src.ffmpeg_helpers import VideoResolution
 from src.files import get_video_files_paths
 from src.logger import log
+from src.smart_filters import FilterPriorities, SmartFilter
 from src.third_party_installers import setup_software
 
 app = typer.Typer(
@@ -40,7 +42,7 @@ def remove_incomplete_files(incomplete_files: set[str]) -> int:
 
 
 @app.command()
-def main(
+def main(  # noqa: PLR0913: too many arguments because of typer
     target_path: Annotated[
         Path,
         typer.Option(
@@ -90,6 +92,41 @@ def main(
             help='Should the original files be deleted after compression.',
         ),
     ] = False,
+    #
+    # ---------- Smart Filter options ----------
+    #
+    filter_min_bitrate: Annotated[
+        int | None,
+        typer.Option(
+            '--filter-min-bitrate',
+            '-b',
+            help='The minimum bitrate in kbytes. Videos below this threshold will be skipped.',
+        ),
+    ] = None,
+    filter_min_frame_rate: Annotated[
+        int | None,
+        typer.Option(
+            '--filter-min-frame-rate',
+            '-f',
+            help='The minimum frame rate. Videos below this threshold will be skipped.',
+        ),
+    ] = None,
+    filter_min_resolution: Annotated[
+        VideoResolution,
+        typer.Option(
+            '--filter-min-resolution',
+            '-r',
+            help='The minimum resolution. Videos below this threshold will be skipped.',
+            parser=VideoResolution.parse_resolution,
+        ),
+    ] = None,
+    filter_priority: Annotated[
+        FilterPriorities,
+        typer.Option(
+            '--filter-priority',
+            help='The priority of the filters. Higher values mean more strict filters.',
+        ),
+    ] = FilterPriorities.STRICT.value,
 ) -> None:
     """
     Compress your video files in batch with HandbrakeCLI.
@@ -156,6 +193,13 @@ def main(
         remove_incomplete_files(incomplete_files)
         log.success(f'Removed {len(incomplete_files)} incomplete files. 🧹✨')
 
+    smart_filter = SmartFilter(
+        filter_priority=filter_priority,
+        minimal_resolution=filter_min_resolution,
+        minimal_bitrate_kbytes=filter_min_bitrate,
+        minimal_frame_rate=filter_min_frame_rate,
+    )
+
     compressor = BatchVideoCompressor(
         show_stats=show_stats,
         delete_original_files=delete_original_files,
@@ -163,6 +207,7 @@ def main(
         progress_ext=progress_ext,
         complete_ext=complete_ext,
         handbrakecli_options=handbrakecli_options,
+        smart_filter=smart_filter,
     )
     compressor.compress_videos()
 
