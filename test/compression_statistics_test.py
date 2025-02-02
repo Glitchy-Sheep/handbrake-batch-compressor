@@ -36,7 +36,7 @@ def test_per_file_statistics_output_larger(video_files: tuple[Path, Path]):
     assert info.path == input_file
     assert info.initial_size_bytes == 50
     assert info.final_size_bytes == 100
-    assert info.diff_size == 50
+    assert info.diff_size_bytes == 50
     assert info.compression_rate == '+100%'
 
 
@@ -57,7 +57,7 @@ def test_per_file_statistics_input_larger(video_files: tuple[Path, Path]):
     assert info.path == input_file
     assert info.initial_size_bytes == 100
     assert info.final_size_bytes == 50
-    assert info.diff_size == -50
+    assert info.diff_size_bytes == -50
     assert info.compression_rate == '-50%'
 
 
@@ -78,7 +78,7 @@ def test_per_file_statistics_same_size(video_files: tuple[Path, Path]):
     assert info.path == input_file
     assert info.initial_size_bytes == 0
     assert info.final_size_bytes == 0
-    assert info.diff_size == 0
+    assert info.diff_size_bytes == 0
     assert info.compression_rate == '0%'
 
 

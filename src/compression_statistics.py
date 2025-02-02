@@ -46,13 +46,25 @@ class SizeDifferenceStatistics(BaseModel):
 
     @property
     def compression_rate(self) -> str:
+        """
+        Difference in percentage between initial and final file size.
+
+        In a formatted string.
+
+        e.g: +50%, -20%
+        """
         return self._calculate_compression_rate(
             initial_size=self.initial_size_bytes,
             final_size=self.final_size_bytes,
         )
 
     @property
-    def diff_size(self) -> int:
+    def diff_size_bytes(self) -> int:
+        """
+        The difference between the initial and final size of the file.
+
+        In bytes.
+        """
         return self.final_size_bytes - self.initial_size_bytes
 
 
