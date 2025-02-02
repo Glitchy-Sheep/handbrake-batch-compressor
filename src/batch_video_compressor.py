@@ -15,6 +15,7 @@ Example usage:
 """
 
 import subprocess
+import sys
 from collections.abc import Callable
 from pathlib import Path
 from shlex import split
@@ -89,27 +90,34 @@ class BatchVideoCompressor:
 
             handbrakecli.wait()
 
-        # For some reason handbrakecli doesn't set return code to non zero value on errors
-        # it's literally zero even on invalid video encoder value
-        # so the only way to detect errors is to check stderr for ERROR tag.
-        # TODO(Issue: #2): This code is unreliable in some cases, we need to figure out a better way catch errors
-        # with stderr_log_filename.open(encoding="utf-8") as errlog:
-        #     for line in errlog:
-        #         if "ERROR" in line:
-        #             log.skip_lines(4)
-        #             log.error(
-        #                 f"HANDBRAKECLI got an error for file: '{input_video.name}'\n"
-        #                 f"Please see the last_compression.log file for more details.\n"
-        #                 "Or see the short help message below:\n"
-        #                 "\n"
-        #                 f"{line}"
-        #                 "\n"
-        #                 "Handbrake CLI command was: \n"
-        #                 "\n"
-        #                 f"{compress_cmd}",
-        #             )
+        # HandbrakeCLI will return non zero value only if something went wrong
+        # during encoding .
+        #
+        # But if there is an input/flag error, it will return zero.
+        # so the only way to detect input errors is to check existence of the output file.
+        if not output_video.exists():
+            with stderr_log_filename.open(encoding="utf-8") as errlog:
+                # Try to find the error short description
+                lines = errlog.readlines()
+                error_line = None
+                for idx, line in enumerate(reversed(lines)):
+                    if "ERROR" in line:
+                        error_line = lines[-idx - 1]
+                        break
 
-        #             sys.exit(1)
+                log.skip_lines(3)
+                log.error(
+                    f"HANDBRAKECLI got an error for file: '{input_video.name}'\n"
+                    f"Please see the last_compression.log file for more details.\n"
+                    "\n"
+                    "Handbrake CLI command was: \n"
+                    "\n"
+                    f"{compress_cmd}",
+                )
+                if error_line:
+                    log.error("Last Handbrake CLI error (from log file):")
+                    log.error(error_line)
+                sys.exit(1)
 
     def compress_videos(self) -> None:
         """Traverse all the video files and compress them, removing incomplete ones."""
@@ -132,9 +140,7 @@ class BatchVideoCompressor:
                 input_video = video
 
                 # filename.ext -> filename.compressing.ext
-                output_video = (
-                    video.parent / f"{video.stem}.{self.progress_ext}{video.suffix}"
-                ).absolute()
+                output_video = (video.parent / f"{video.stem}.{self.progress_ext}{video.suffix}").absolute()
 
                 # Compress
                 self.compress_video(
