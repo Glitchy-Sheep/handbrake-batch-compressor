@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from pydantic import BaseModel
 
-from src.videofiles_traverser import supported_videofile_extensions
+from src.files import supported_videofile_extensions
 
 
 @pytest.fixture
@@ -60,9 +60,7 @@ def generate_video_files_data() -> Generator[VideoSampleData, None, None]:
     Path.mkdir(target_dir, parents=True, exist_ok=True)
 
     video_files = [Path(f"test.{ext}") for ext in supported_videofile_extensions]
-    video_files += [
-        Path(f"nested/test.{ext}") for ext in supported_videofile_extensions
-    ]
+    video_files += [Path(f"nested/test.{ext}") for ext in supported_videofile_extensions]
 
     fake_files = [
         Path("test.txt"),
