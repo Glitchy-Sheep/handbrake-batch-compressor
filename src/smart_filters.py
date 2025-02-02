@@ -22,7 +22,7 @@ class FilterPriorities(Enum):
 
     BITRATE = 'bitrate'
     QUALITY = 'quality'
-    BALANCED = 'balanced'
+    STRICT = 'strict'
 
 
 class SmartFilter:
@@ -40,7 +40,7 @@ class SmartFilter:
         minimal_resolution: VideoResolution = None,
         minimal_bitrate_kbytes: int | None = None,
         minimal_frame_rate: int | None = None,
-        filter_priority: FilterPriorities = FilterPriorities.BALANCED,
+        filter_priority: FilterPriorities = FilterPriorities.STRICT,
     ) -> None:
         self.minimal_resolution = minimal_resolution
         self.minimal_bitrate_kbytes = minimal_bitrate_kbytes
@@ -52,12 +52,14 @@ class SmartFilter:
             raise NotAFileError(video_path)
 
         video_properties: VideoProperties = get_video_properties(video_path)
+        if video_properties is None:
+            return False
 
         actual_resolution = video_properties.resolution
         actual_bitrate_kbytes = video_properties.bitrate_kbytes
         actual_frame_rate = video_properties.frame_rate
 
-        balanced_min_exceeded_count = 2
+        strict_filter_min_match = len(FilterPriorities)
 
         exceeds_bitrate = (
             self.minimal_bitrate_kbytes is None
@@ -76,10 +78,10 @@ class SmartFilter:
             return exceeds_bitrate
         if self.filter_priority == FilterPriorities.QUALITY:
             return exceeds_frame_rate or exceeds_resolution
-        if self.filter_priority == FilterPriorities.BALANCED:
+        if self.filter_priority == FilterPriorities.STRICT:
             return (
                 sum([exceeds_bitrate, exceeds_frame_rate, exceeds_resolution])
-                >= balanced_min_exceeded_count
+                == strict_filter_min_match
             )
 
         return False
