@@ -106,6 +106,7 @@ class CompressionStatistics:
         input_file: Path,
         output_file: Path,
     ) -> FileStatistics:
+        """Add a new compression info based on the given input and output files."""
         input_size = input_file.stat().st_size
         output_size = output_file.stat().st_size
 
@@ -125,4 +126,5 @@ class CompressionStatistics:
 
     @property
     def overall_stats(self) -> GeneralStatistics:
+        """Returns statistics about the complete compression process."""
         return self._general_stats

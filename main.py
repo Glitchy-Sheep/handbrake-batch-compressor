@@ -13,9 +13,9 @@ from src.cli_guards import (
     check_handbrakecli_options,
     check_target_path,
 )
+from src.files import get_video_files_paths
 from src.logger import log
 from src.third_party_installers import setup_software
-from src.videofiles_traverser import get_video_files_paths
 
 app = typer.Typer(
     no_args_is_help=True,
@@ -36,7 +36,7 @@ def remove_incomplete_files(incomplete_files: set[str]) -> int:
             except OSError as e:
                 log.error(f'Failed to remove file {file}: {e}')
         else:
-            log.warning(f'File {file} does not exist, skipping.')
+            log.error(f'File {file} does not exist, skipping.')
 
 
 @app.command()
@@ -135,7 +135,7 @@ def main(
     # Remove complete files from unprocessed
     for original_file in (
         # filename.complete_ext.ext -> filename.ext
-        x.parent / f"{x.stem.replace(f'.{complete_ext}', '')}{x.suffix}"
+        x.parent / f'{x.stem.replace(f".{complete_ext}", "")}{x.suffix}'
         for x in complete_files
     ):
         unprocessed_files.discard(original_file)
