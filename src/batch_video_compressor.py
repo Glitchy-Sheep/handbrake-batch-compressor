@@ -20,8 +20,11 @@ from collections.abc import Callable
 from pathlib import Path
 from shlex import split
 
+from rich.markup import escape
 from rich.progress import Progress
 
+from src.compression_statistics import CompressionStatistics, FileStatistics
+from src.files import human_readable_size
 from src.handbrake_cli_output_capturer import (
     HandbrakeProgressInfo,
     parse_handbrake_cli_output,
@@ -36,16 +39,50 @@ class BatchVideoCompressor:
         self,
         video_files: set[Path],
         *,
+        show_stats: bool = False,
         delete_original_files: bool = False,
-        progress_ext: str = "compressing",
-        complete_ext: str = "compressed",
-        handbrakecli_options: str = "",
+        progress_ext: str = 'compressing',
+        complete_ext: str = 'compressed',
+        handbrakecli_options: str = '',
     ) -> None:
         self.progress_ext = progress_ext
         self.complete_ext = complete_ext
         self.video_files = video_files
+        self.show_stats = show_stats
         self.delete_original_files = delete_original_files
         self.handbrake_cli_options = handbrakecli_options
+
+        self.statistics = CompressionStatistics()
+
+    def log_stats(self, info: FileStatistics | None = None) -> None:
+        """Log the compression stats for the given file or overall stats if info is not provided."""
+        # Determine stats based on input (file-specific or overall)
+        stats = info if info else self.statistics.overall_stats
+
+        # Format compression rate and sizes
+        is_positive = '+' not in stats.compression_rate
+        color = 'green' if is_positive else 'red'
+        bold = ' bold' if is_positive else ''
+
+        compression_rate = (
+            f'[{color}{bold}]{escape(stats.compression_rate)}[/{color}{bold}]'
+        )
+        init_size = (
+            f'[{color}]{human_readable_size(stats.initial_size_bytes)}[/{color}]'
+        )
+        final_size = f'[{color}]{human_readable_size(stats.final_size_bytes)}[/{color}]'
+
+        # Log the message, adjusting for file path if necessary
+        if info:
+            log.success(
+                f'Compressed {info.path.name} (size: {init_size} -> {final_size}) {compression_rate}',
+                highlight=False,
+            )
+        else:
+            log.success(
+                f'Overall stats: {compression_rate} (size: {init_size} -> {final_size})',
+                highlight=False,
+            )
 
     def compress_video(
         self,
@@ -60,19 +97,19 @@ class BatchVideoCompressor:
         on_update is a callback that will be called with HandbrakeProgressInfo on each update from handbrakecli.
         """
         compress_cmd = [
-            "handbrakecli",
-            "-i",
+            'handbrakecli',
+            '-i',
             input_video,
-            "-o",
+            '-o',
             output_video,
-            *split(self.handbrake_cli_options, " "),
+            *split(self.handbrake_cli_options, ' '),
         ]
 
-        stderr_log_filename = Path("last_compression.log")
+        stderr_log_filename = Path('last_compression.log')
 
         with stderr_log_filename.open(
-            "w+",
-            encoding="utf-8",
+            'w+',
+            encoding='utf-8',
         ) as last_compression_log:
             handbrakecli = subprocess.Popen(  # noqa: S603 - compress_cmd is safe and checked before, but maybe we can remove this ignore with a more elegant solution
                 compress_cmd,
@@ -81,7 +118,7 @@ class BatchVideoCompressor:
                 text=True,
                 bufsize=1,
                 universal_newlines=True,
-                encoding="utf-8",
+                encoding='utf-8',
             )
 
             for line in handbrakecli.stdout:
@@ -96,28 +133,32 @@ class BatchVideoCompressor:
         # But if there is an input/flag error, it will return zero.
         # so the only way to detect input errors is to check existence of the output file.
         if not output_video.exists():
-            with stderr_log_filename.open(encoding="utf-8") as errlog:
+            with stderr_log_filename.open(encoding='utf-8') as errlog:
                 # Try to find the error short description
                 lines = errlog.readlines()
                 error_line = None
                 for idx, line in enumerate(reversed(lines)):
-                    if "ERROR" in line:
+                    if 'ERROR' in line:
                         error_line = lines[-idx - 1]
                         break
 
                 log.skip_lines(3)
                 log.error(
                     f"HANDBRAKECLI got an error for file: '{input_video.name}'\n"
-                    f"Please see the last_compression.log file for more details.\n"
-                    "\n"
-                    "Handbrake CLI command was: \n"
-                    "\n"
-                    f"{compress_cmd}",
+                    f'Please see the last_compression.log file for more details.\n'
+                    '\n'
+                    'Handbrake CLI command was: \n'
+                    '\n'
+                    f'{compress_cmd}',
                 )
                 if error_line:
-                    log.error("Last Handbrake CLI error (from log file):")
+                    log.error('Last Handbrake CLI error (from log file):')
                     log.error(error_line)
                 sys.exit(1)
+
+        if self.show_stats:
+            stats = self.statistics.add_compression_info(input_video, output_video)
+            self.log_stats(stats)
 
     def compress_videos(self) -> None:
         """Traverse all the video files and compress them, removing incomplete ones."""
@@ -127,20 +168,22 @@ class BatchVideoCompressor:
             refresh_per_second=1,
         ) as progress:
             all_videos_task = progress.add_task(
-                description=f"Compressing videos (0/{len(self.video_files)}) 0%",
+                description=f'Compressing videos (0/{len(self.video_files)}) 0%',
                 total=len(self.video_files),
             )
 
             for idx, video in enumerate(self.video_files):
                 current_compression = progress.add_task(
                     total=100,
-                    description=f"Compressing {video.name} (0%)",
+                    description=f'Compressing {video.name} (0%)',
                 )
 
                 input_video = video
 
                 # filename.ext -> filename.compressing.ext
-                output_video = (video.parent / f"{video.stem}.{self.progress_ext}{video.suffix}").absolute()
+                output_video = (
+                    video.parent / f'{video.stem}.{self.progress_ext}{video.suffix}'
+                ).absolute()
 
                 # Compress
                 self.compress_video(
@@ -149,7 +192,7 @@ class BatchVideoCompressor:
                     on_update=lambda info, task=current_compression: progress.update(
                         task_id=task,
                         completed=info.progress,
-                        description=f"[italic]FPS: {info.fps_current or ''}[/italic] - [underline] Average FPS: {info.fps_average or ''}",
+                        description=f'[italic]FPS: {info.fps_current or ""}[/italic] - [underline] Average FPS: {info.fps_average or ""}',
                     ),
                 )
 
@@ -158,7 +201,7 @@ class BatchVideoCompressor:
                     self.progress_ext,
                     self.complete_ext,
                 )
-                output_video.rename(video.parent / f"{completed_stem}{video.suffix}")
+                output_video.rename(video.parent / f'{completed_stem}{video.suffix}')
 
                 if self.delete_original_files and input_video.exists():
                     input_video.unlink()
@@ -168,6 +211,9 @@ class BatchVideoCompressor:
                 progress.update(
                     all_videos_task,
                     advance=1,
-                    description=f"Compressing videos ({idx + 1}/{len(self.video_files)}) {int((idx + 1) / len(self.video_files) * 100)}%",
+                    description=f'Compressing videos ({idx + 1}/{len(self.video_files)}) {int((idx + 1) / len(self.video_files) * 100)}%',
                     refresh=True,
                 )
+
+            if len(self.video_files) > 0 and self.show_stats:
+                self.log_stats()

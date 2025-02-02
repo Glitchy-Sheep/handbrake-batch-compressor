@@ -22,16 +22,16 @@ def check_extensions_arguments(progress_ext: str, complete_ext: str) -> None:
         - No dots
         - No empty
     """
-    if progress_ext.count(".") > 0 or complete_ext.count(".") > 0:
-        log.error("Progress and complete extensions cannot contain dots.")
+    if progress_ext.count('.') > 0 or complete_ext.count('.') > 0:
+        log.error('Progress and complete extensions cannot contain dots.')
         sys.exit(1)
 
     if progress_ext == complete_ext:
-        log.error("Progress and complete extensions cannot be the same.")
+        log.error('Progress and complete extensions cannot be the same.')
         sys.exit(1)
 
     if len(progress_ext) == 0 or len(complete_ext) == 0:
-        log.error("Progress and complete extensions cannot be empty.")
+        log.error('Progress and complete extensions cannot be empty.')
         sys.exit(1)
 
 
@@ -42,10 +42,10 @@ def check_handbrakecli_options(handbrakecli_options: str) -> None:
     Options are generally valid if they are not input/output options.
     """
     if (
-        "-i" in handbrakecli_options
-        or "-o" in handbrakecli_options
-        or "--input" in handbrakecli_options
-        or "--output" in handbrakecli_options
+        '-i' in handbrakecli_options
+        or '-o' in handbrakecli_options
+        or '--input' in handbrakecli_options
+        or '--output' in handbrakecli_options
     ):
         log.error(
             dedent(

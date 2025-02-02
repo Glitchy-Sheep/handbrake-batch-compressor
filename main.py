@@ -13,16 +13,16 @@ from src.cli_guards import (
     check_handbrakecli_options,
     check_target_path,
 )
+from src.files import get_video_files_paths
 from src.logger import log
 from src.third_party_installers import setup_software
-from src.videofiles_traverser import get_video_files_paths
 
 app = typer.Typer(
     no_args_is_help=True,
     cls=True,
     add_completion=False,
     rich_help_panel=True,
-    rich_markup_mode="rich",
+    rich_markup_mode='rich',
 )
 
 
@@ -34,9 +34,9 @@ def remove_incomplete_files(incomplete_files: set[str]) -> int:
             try:
                 file_path.unlink()
             except OSError as e:
-                log.error(f"Failed to remove file {file}: {e}")
+                log.error(f'Failed to remove file {file}: {e}')
         else:
-            log.warning(f"File {file} does not exist, skipping.")
+            log.error(f'File {file} does not exist, skipping.')
 
 
 @app.command()
@@ -44,42 +44,50 @@ def main(
     target_path: Annotated[
         Path,
         typer.Option(
-            "--target-path",
-            "-t",
-            help="The path where your videos are.",
+            '--target-path',
+            '-t',
+            help='The path where your videos are.',
         ),
     ],
     handbrakecli_options: Annotated[
         str,
         typer.Option(
-            "--handbrakecli-options",
-            "-o",
+            '--handbrakecli-options',
+            '-o',
             help="You can pass HandbrakeCLI options through this argument. (Don't forget to quote them in one string)",
         ),
     ],
     progress_ext: Annotated[
         str,
         typer.Option(
-            "--progress-extension",
-            "-p",
-            help="Extension which will be added to the file while processing it.",
+            '--progress-extension',
+            '-p',
+            help='Extension which will be added to the file while processing it.',
         ),
-    ] = "compressing",
+    ] = 'compressing',
     complete_ext: Annotated[
         str,
         typer.Option(
-            "--complete-extension",
-            "-c",
+            '--complete-extension',
+            '-c',
             help="Extension which will be added to the file when it's complete.",
         ),
-    ] = "compressed",
+    ] = 'compressed',
     *,
+    show_stats: Annotated[
+        bool,
+        typer.Option(
+            '--show-stats',
+            '-s',
+            help='Should stats be shown during the compression and after it.',
+        ),
+    ] = False,
     delete_original_files: Annotated[
         bool,
         typer.Option(
-            "--delete-original-files",
-            "-d",
-            help="Should the original files be deleted after compression.",
+            '--delete-original-files',
+            '-d',
+            help='Should the original files be deleted after compression.',
         ),
     ] = False,
 ) -> None:
@@ -110,21 +118,21 @@ def main(
     setup_software()
 
     # All video files, unprocessed, processed and incomplete
-    log.wait("Collecting all your video files...")
+    log.wait('Collecting all your video files...')
     video_files = set(get_video_files_paths(target_path))
 
     if len(video_files) == 0:
-        log.success("No video files found. - Nothing to do.")
+        log.success('No video files found. - Nothing to do.')
         sys.exit(1)
 
-    log.success(f"Found {len(video_files)} video files.")
+    log.success(f'Found {len(video_files)} video files.')
 
     complete_files = set()
     incomplete_files = set()
     unprocessed_files = set()
 
     for file in video_files:
-        extensions = {x.replace(".", "") for x in file.suffixes}
+        extensions = {x.replace('.', '') for x in file.suffixes}
         if complete_ext in extensions:
             complete_files.add(file)
         elif progress_ext in extensions:
@@ -135,20 +143,21 @@ def main(
     # Remove complete files from unprocessed
     for original_file in (
         # filename.complete_ext.ext -> filename.ext
-        x.parent / f"{x.stem.replace(f'.{complete_ext}', '')}{x.suffix}"
+        x.parent / f'{x.stem.replace(f".{complete_ext}", "")}{x.suffix}'
         for x in complete_files
     ):
         unprocessed_files.discard(original_file)
 
-    log.info(f"Found complete files: {len(complete_files)}")
-    log.info(f"Found incomplete files: {len(incomplete_files)}")
-    log.info(f"Found unprocessed files: {len(unprocessed_files)}")
+    log.info(f'Found complete files: {len(complete_files)}')
+    log.info(f'Found incomplete files: {len(incomplete_files)}')
+    log.info(f'Found unprocessed files: {len(unprocessed_files)}')
 
     if len(incomplete_files) > 0:
         remove_incomplete_files(incomplete_files)
-        log.success(f"Removed {len(incomplete_files)} incomplete files. 🧹✨")
+        log.success(f'Removed {len(incomplete_files)} incomplete files. 🧹✨')
 
     compressor = BatchVideoCompressor(
+        show_stats=show_stats,
         delete_original_files=delete_original_files,
         video_files=unprocessed_files,
         progress_ext=progress_ext,
@@ -157,8 +166,8 @@ def main(
     )
     compressor.compress_videos()
 
-    log.success("Everything is done! 🎉")
+    log.success('Everything is done! 🎉')
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     app()

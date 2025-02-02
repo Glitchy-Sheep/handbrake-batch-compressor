@@ -18,7 +18,7 @@ class VideoResolution(BaseModel):
 
     def __str__(self) -> str:
         """Resolution representation e.g: 1280x720."""
-        return f"{self.width}x{self.height}"
+        return f'{self.width}x{self.height}'
 
     @property
     def area(self) -> int:
@@ -39,5 +39,5 @@ def get_video_resolution(video_path: str) -> VideoResolution:
         probe.close()
         return VideoResolution(width=width, height=height)
     except (av.error.InvalidDataError, av.error.MediaTypeError, IndexError) as e:
-        log.error(f"Error getting video resolution: {e}")
+        log.error(f'Error getting video resolution: {e}')
         return None
