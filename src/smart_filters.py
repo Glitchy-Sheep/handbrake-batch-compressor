@@ -20,9 +20,9 @@ class NotAFileError(Exception):
 class FilterPriorities(Enum):
     """Enum class to represent the priorities of the filters."""
 
-    BITRATE = 1
-    QUALITY = 2
-    BALANCED = 3
+    BITRATE = 'bitrate'
+    QUALITY = 'quality'
+    BALANCED = 'balanced'
 
 
 class SmartFilter:
