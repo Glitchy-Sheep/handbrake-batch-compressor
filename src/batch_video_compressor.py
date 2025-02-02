@@ -39,6 +39,7 @@ class BatchVideoCompressor:
         self,
         video_files: set[Path],
         *,
+        show_stats: bool = False,
         delete_original_files: bool = False,
         progress_ext: str = 'compressing',
         complete_ext: str = 'compressed',
@@ -47,6 +48,7 @@ class BatchVideoCompressor:
         self.progress_ext = progress_ext
         self.complete_ext = complete_ext
         self.video_files = video_files
+        self.show_stats = show_stats
         self.delete_original_files = delete_original_files
         self.handbrake_cli_options = handbrakecli_options
 
@@ -154,8 +156,9 @@ class BatchVideoCompressor:
                     log.error(error_line)
                 sys.exit(1)
 
-        stats = self.statistics.add_compression_info(input_video, output_video)
-        self.log_stats(stats)
+        if self.show_stats:
+            stats = self.statistics.add_compression_info(input_video, output_video)
+            self.log_stats(stats)
 
     def compress_videos(self) -> None:
         """Traverse all the video files and compress them, removing incomplete ones."""
@@ -211,5 +214,6 @@ class BatchVideoCompressor:
                     description=f'Compressing videos ({idx + 1}/{len(self.video_files)}) {int((idx + 1) / len(self.video_files) * 100)}%',
                     refresh=True,
                 )
-            if len(self.video_files) > 0:
+
+            if len(self.video_files) > 0 and self.show_stats:
                 self.log_stats()

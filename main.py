@@ -74,6 +74,14 @@ def main(
         ),
     ] = 'compressed',
     *,
+    show_stats: Annotated[
+        bool,
+        typer.Option(
+            '--show-stats',
+            '-s',
+            help='Should stats be shown during the compression and after it.',
+        ),
+    ] = False,
     delete_original_files: Annotated[
         bool,
         typer.Option(
@@ -149,6 +157,7 @@ def main(
         log.success(f'Removed {len(incomplete_files)} incomplete files. 🧹✨')
 
     compressor = BatchVideoCompressor(
+        show_stats=show_stats,
         delete_original_files=delete_original_files,
         video_files=unprocessed_files,
         progress_ext=progress_ext,
