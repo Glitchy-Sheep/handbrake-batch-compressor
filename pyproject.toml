@@ -27,7 +27,7 @@ ruff = "^0.9.4"
 # ---------------- RUFF Linter ---------------- 
 [tool.ruff]
 # match black
-line-length = 120
+line-length = 88
 select = [
     "ALL", # include all the rules, including new ones
 ]
@@ -43,3 +43,9 @@ ignore = [
 
 [tool.ruff.lint.per-file-ignores]
 "test/*" = ["D", "ANN201", "S101", "PLR2004"]
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "single"

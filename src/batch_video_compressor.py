@@ -37,9 +37,9 @@ class BatchVideoCompressor:
         video_files: set[Path],
         *,
         delete_original_files: bool = False,
-        progress_ext: str = "compressing",
-        complete_ext: str = "compressed",
-        handbrakecli_options: str = "",
+        progress_ext: str = 'compressing',
+        complete_ext: str = 'compressed',
+        handbrakecli_options: str = '',
     ) -> None:
         self.progress_ext = progress_ext
         self.complete_ext = complete_ext
@@ -60,19 +60,19 @@ class BatchVideoCompressor:
         on_update is a callback that will be called with HandbrakeProgressInfo on each update from handbrakecli.
         """
         compress_cmd = [
-            "handbrakecli",
-            "-i",
+            'handbrakecli',
+            '-i',
             input_video,
-            "-o",
+            '-o',
             output_video,
-            *split(self.handbrake_cli_options, " "),
+            *split(self.handbrake_cli_options, ' '),
         ]
 
-        stderr_log_filename = Path("last_compression.log")
+        stderr_log_filename = Path('last_compression.log')
 
         with stderr_log_filename.open(
-            "w+",
-            encoding="utf-8",
+            'w+',
+            encoding='utf-8',
         ) as last_compression_log:
             handbrakecli = subprocess.Popen(  # noqa: S603 - compress_cmd is safe and checked before, but maybe we can remove this ignore with a more elegant solution
                 compress_cmd,
@@ -81,7 +81,7 @@ class BatchVideoCompressor:
                 text=True,
                 bufsize=1,
                 universal_newlines=True,
-                encoding="utf-8",
+                encoding='utf-8',
             )
 
             for line in handbrakecli.stdout:
@@ -96,12 +96,12 @@ class BatchVideoCompressor:
         # But if there is an input/flag error, it will return zero.
         # so the only way to detect input errors is to check existence of the output file.
         if not output_video.exists():
-            with stderr_log_filename.open(encoding="utf-8") as errlog:
+            with stderr_log_filename.open(encoding='utf-8') as errlog:
                 # Try to find the error short description
                 lines = errlog.readlines()
                 error_line = None
                 for idx, line in enumerate(reversed(lines)):
-                    if "ERROR" in line:
+                    if 'ERROR' in line:
                         error_line = lines[-idx - 1]
                         break
 
@@ -115,7 +115,7 @@ class BatchVideoCompressor:
                     f"{compress_cmd}",
                 )
                 if error_line:
-                    log.error("Last Handbrake CLI error (from log file):")
+                    log.error('Last Handbrake CLI error (from log file):')
                     log.error(error_line)
                 sys.exit(1)
 
@@ -127,20 +127,20 @@ class BatchVideoCompressor:
             refresh_per_second=1,
         ) as progress:
             all_videos_task = progress.add_task(
-                description=f"Compressing videos (0/{len(self.video_files)}) 0%",
+                description=f'Compressing videos (0/{len(self.video_files)}) 0%',
                 total=len(self.video_files),
             )
 
             for idx, video in enumerate(self.video_files):
                 current_compression = progress.add_task(
                     total=100,
-                    description=f"Compressing {video.name} (0%)",
+                    description=f'Compressing {video.name} (0%)',
                 )
 
                 input_video = video
 
                 # filename.ext -> filename.compressing.ext
-                output_video = (video.parent / f"{video.stem}.{self.progress_ext}{video.suffix}").absolute()
+                output_video = (video.parent / f'{video.stem}.{self.progress_ext}{video.suffix}').absolute()
 
                 # Compress
                 self.compress_video(
@@ -158,7 +158,7 @@ class BatchVideoCompressor:
                     self.progress_ext,
                     self.complete_ext,
                 )
-                output_video.rename(video.parent / f"{completed_stem}{video.suffix}")
+                output_video.rename(video.parent / f'{completed_stem}{video.suffix}')
 
                 if self.delete_original_files and input_video.exists():
                     input_video.unlink()
@@ -168,6 +168,6 @@ class BatchVideoCompressor:
                 progress.update(
                     all_videos_task,
                     advance=1,
-                    description=f"Compressing videos ({idx + 1}/{len(self.video_files)}) {int((idx + 1) / len(self.video_files) * 100)}%",
+                    description=f'Compressing videos ({idx + 1}/{len(self.video_files)}) {int((idx + 1) / len(self.video_files) * 100)}%',
                     refresh=True,
                 )

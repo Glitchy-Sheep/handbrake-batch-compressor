@@ -25,9 +25,9 @@ class InstallCommand(BaseModel):
 
         The platform is detected using the `os.name` variable.
         """
-        if os.name == "nt":
+        if os.name == 'nt':
             cmd = self.win
-        elif os.name == "posix":
+        elif os.name == 'posix':
             cmd = self.linux
         else:
             cmd = self.mac
@@ -76,30 +76,30 @@ def setup_software() -> None:
     """
     ffmpeg = Software(
         install_cmd=InstallCommand(
-            win="winget install ffmpeg",
-            linux="sudo apt-get install ffmpeg",
-            mac="brew install ffmpeg",
+            win='winget install ffmpeg',
+            linux='sudo apt-get install ffmpeg',
+            mac='brew install ffmpeg',
         ),
-        check_cmd="ffmpeg -version",
+        check_cmd='ffmpeg -version',
     )
 
     handbrake_cli = Software(
         install_cmd=InstallCommand(
-            win="winget install Handbrake.Handbrake.CLI",
-            linux="sudo apt-get install handbrake-cli",
-            mac="brew install handbrake-cli",
+            win='winget install Handbrake.Handbrake.CLI',
+            linux='sudo apt-get install handbrake-cli',
+            mac='brew install handbrake-cli',
         ),
-        check_cmd="handbrakecli --version",
+        check_cmd='handbrakecli --version',
     )
 
     if not ffmpeg.is_installed():
-        log.wait("Installing FFmpeg...")
+        log.wait('Installing FFmpeg...')
         ffmpeg.install()
 
-    log.success("FFmpeg is installed.")
+    log.success('FFmpeg is installed.')
 
     if not handbrake_cli.is_installed():
-        log.wait("Installing Handbrake CLI...")
+        log.wait('Installing Handbrake CLI...')
         handbrake_cli.install()
 
-    log.success("Handbrake CLI is installed.")
+    log.success('Handbrake CLI is installed.')
