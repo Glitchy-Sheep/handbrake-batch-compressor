@@ -1,3 +1,5 @@
+"""Logger for the application."""
+
 import logging
 
 from rich.console import Console
@@ -15,29 +17,30 @@ logging.basicConfig(
 
 
 class AppLogger:
-    def __init__(self):
+    """Wrapper around the logging library with some extra features."""
+
+    def __init__(self) -> None:
         self._log = logging.getLogger(__name__)
         self.console = _console
 
-    def info(self, msg, should_log=True):
+    def info(self, msg: str, *, should_log: bool = True) -> None:
         if should_log:
             self._log.info(f"ℹ {msg}")
 
-    def success(self, msg, should_log=True):
+    def success(self, msg: str, *, should_log: bool = True) -> None:
         if should_log:
             self._log.info(f"✔ {msg}")
 
-    def error(self, msg, should_log=True):
+    def error(self, msg: str, *, should_log: bool = True) -> None:
         if should_log:
             self._log.error(f"❌ {msg}")
 
-    def wait(self, msg, should_log=True):
+    def wait(self, msg: str, *, should_log: bool = True) -> None:
         if should_log:
             self._log.info(f"⏳ {msg}")
 
-    def skip_lines(self, count):
-        for _ in range(count):
-            print("\n" * count, end="")
+    def skip_lines(self, count: int) -> None:
+        self.console.print("\n" * count, end="")
 
 
 log = AppLogger()

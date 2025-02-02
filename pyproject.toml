@@ -32,12 +32,13 @@ select = [
     "ALL", # include all the rules, including new ones
 ]
 ignore = [
-    "E501", # line too long    
-    "D102", # missing docstring in public method
-    "D212", # multiline docstring should start at the first line (personal preference)
-    "D107", # missing docstring in __init__ (lol why)
-    "D400", # first line should end with a period (sometimes mess with markdown or code blocks)
-    "D415", # first line should end with a period (same as above but trickier)
+    "E501",   # line too long    
+    "D102",   # missing docstring in public method
+    "D212",   # multiline docstring should start at the first line (personal preference)
+    "D107",   # missing docstring in __init__ (lol why)
+    "D400",   # first line should end with a period (sometimes mess with markdown or code blocks)
+    "D415",   # first line should end with a period (same as above but trickier)
+    "RUF001", # unused variable
 ]
 
 [tool.ruff.lint.per-file-ignores]

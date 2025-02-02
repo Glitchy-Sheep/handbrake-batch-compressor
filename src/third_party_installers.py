@@ -1,3 +1,5 @@
+"""The module provides a class to install a software on Windows, Linux, and macOS."""
+
 import os
 import subprocess
 
@@ -7,11 +9,22 @@ from src.logger import log
 
 
 class InstallCommand(BaseModel):
+    """
+    Class representing a command to install a software on Windows, Linux, and macOS.
+
+    You should specify how to install the software on each platform.
+    """
+
     win: str
     linux: str
     mac: str
 
-    def run(self):
+    def run(self) -> None:
+        """
+        Run the install command for the current platform.
+
+        The platform is detected using the `os.name` variable.
+        """
         if os.name == "nt":
             cmd = self.win
         elif os.name == "posix":
@@ -19,9 +32,8 @@ class InstallCommand(BaseModel):
         else:
             cmd = self.mac
 
-        subprocess.run(
+        subprocess.run(  # noqa: S603, warning about unsanitized subprocess
             cmd,
-            shell=True,
             stdout=subprocess.PIPE,
             stderr=subprocess.STDOUT,
             check=True,
@@ -29,47 +41,57 @@ class InstallCommand(BaseModel):
 
 
 class Software:
-    def __init__(self, install_cmd: InstallCommand, check_cmd: str):
+    """
+    Class representing a software to install.
+
+    You should specify how to check if the software is installed and how to install it.
+    """
+
+    def __init__(self, install_cmd: InstallCommand, check_cmd: str) -> None:
         self.check_cmd = check_cmd
         self.install_cmd = install_cmd
 
-    def is_installed(self):
+    def is_installed(self) -> bool:
         try:
-            subprocess.run(
+            subprocess.run(  # noqa: S603 , warning about unsanitized subprocess
                 self.check_cmd,
-                shell=True,
                 stdout=subprocess.PIPE,
                 stderr=subprocess.STDOUT,
                 check=True,
             )
-            return True
         except subprocess.CalledProcessError:
             return False
+        else:
+            return True
 
-    def install(self):
+    def install(self) -> None:
         self.install_cmd.run()
 
 
-ffmpeg = Software(
-    install_cmd=InstallCommand(
-        win="winget install ffmpeg",
-        linux="sudo apt-get install ffmpeg",
-        mac="brew install ffmpeg",
-    ),
-    check_cmd="ffmpeg -version",
-)
+def setup_software() -> None:
+    """
+    Install all the required software for the script to work.
 
-handbrake_cli = Software(
-    install_cmd=InstallCommand(
-        win="winget install Handbrake.Handbrake.CLI",
-        linux="sudo apt-get install handbrake-cli",
-        mac="brew install handbrake-cli",
-    ),
-    check_cmd="handbrakecli --version",
-)
+    Including: FFmpeg and Handbrake CLI.
+    """
+    ffmpeg = Software(
+        install_cmd=InstallCommand(
+            win="winget install ffmpeg",
+            linux="sudo apt-get install ffmpeg",
+            mac="brew install ffmpeg",
+        ),
+        check_cmd="ffmpeg -version",
+    )
 
+    handbrake_cli = Software(
+        install_cmd=InstallCommand(
+            win="winget install Handbrake.Handbrake.CLI",
+            linux="sudo apt-get install handbrake-cli",
+            mac="brew install handbrake-cli",
+        ),
+        check_cmd="handbrakecli --version",
+    )
 
-def setup_software():
     if not ffmpeg.is_installed():
         log.wait("Installing FFmpeg...")
         ffmpeg.install()
