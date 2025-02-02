@@ -10,6 +10,13 @@ from pydantic import BaseModel
 from src.logger import log
 
 
+class InvalidResolutionError(Exception):
+    """Exception raised for an invalid resolution."""
+
+    def __init__(self, resolution: str) -> None:
+        super().__init__(f'Invalid resolution: {resolution}')
+
+
 class VideoResolution(BaseModel):
     """Data class representing a video resolution."""
 
@@ -24,6 +31,20 @@ class VideoResolution(BaseModel):
     def area(self) -> int:
         """Calculate the area of the video resolution."""
         return self.width * self.height
+
+    @staticmethod
+    def parse_resolution(resolution: str) -> 'VideoResolution':
+        if 'x' not in resolution:
+            raise InvalidResolutionError(resolution)
+
+        width, height = resolution.split('x')
+        width = int(width)
+        height = int(height)
+
+        if width < 0 or height < 0:
+            raise InvalidResolutionError(resolution)
+
+        return VideoResolution(width=width, height=height)
 
 
 class VideoProperties(BaseModel):
