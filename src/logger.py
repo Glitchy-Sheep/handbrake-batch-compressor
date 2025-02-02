@@ -40,8 +40,7 @@ class AppLogger:
             self._log.info(f"⏳ {msg}")
 
     def skip_lines(self, count: int) -> None:
-        for _ in range(count):
-            self.console.print("\n" * count, end="")
+        self.console.print("\n" * count, end="")
 
 
 log = AppLogger()
