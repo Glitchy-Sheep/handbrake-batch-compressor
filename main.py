@@ -135,7 +135,7 @@ def main(
     # Remove complete files from unprocessed
     for original_file in (
         # filename.complete_ext.ext -> filename.ext
-        x.parent / f"{x.stem.replace(f".{complete_ext}", '')}{x.suffix}"
+        x.parent / f"{x.stem.replace(f'.{complete_ext}', '')}{x.suffix}"
         for x in complete_files
     ):
         unprocessed_files.discard(original_file)
