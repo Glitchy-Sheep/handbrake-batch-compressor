@@ -31,11 +31,22 @@ class VideoResolution(BaseModel):
         return f'{self.width}x{self.height}'
 
     def __eq__(self, other: object) -> bool:
+        """
+        Compare two resolutions for equality.
+
+        Two resolutions are equal if their width and height are equal.
+        """
         if not isinstance(other, VideoResolution):
             return False
         return self.width == other.width and self.height == other.height
 
     def __lt__(self, other: object) -> bool:
+        """
+        Compare two resolutions for being one less than the other.
+
+        The comparison is done by comparing the area of the resolutions.
+        For example, 1280x720 is less than 1280x719. (By 1280 pixels)
+        """
         if not isinstance(other, VideoResolution):
             return False
         return self.area < other.area
