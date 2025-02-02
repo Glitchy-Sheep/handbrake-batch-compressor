@@ -124,6 +124,11 @@ class CompressionStatistics:
 
         return file_stat
 
+    def skip_file(self, input_file: Path) -> None:
+        """Skips a file and updates the general statistics."""
+        self._general_stats.files_skipped += 1
+        self._general_stats.initial_size_bytes += input_file.stat().st_size
+
     @property
     def overall_stats(self) -> GeneralStatistics:
         """Returns statistics about the complete compression process."""
