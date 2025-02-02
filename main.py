@@ -58,7 +58,7 @@ def main(  # noqa: PLR0913: too many arguments because of typer
             '-o',
             help="You can pass HandbrakeCLI options through this argument. (Don't forget to quote them in one string)",
         ),
-    ],
+    ] = '',
     progress_ext: Annotated[
         str,
         typer.Option(
