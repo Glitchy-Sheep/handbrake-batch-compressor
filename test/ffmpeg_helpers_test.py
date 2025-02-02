@@ -1,27 +1,18 @@
 from pathlib import Path
 
-from src.ffmpeg_helpers import (
-    get_video_bitrate,
-    get_video_frame_rate,
-    get_video_resolution,
-)
+from src.ffmpeg_helpers import VideoProperties, get_video_properties
 
 
 def test_get_video_resolution(video_720p_2mb_mp4: Path):
-    resolution = get_video_resolution(video_720p_2mb_mp4)
+    video_properties: VideoProperties = get_video_properties(
+        video_720p_2mb_mp4,
+    )
 
-    assert resolution.width == 1280
-    assert resolution.height == 720
-    assert resolution.area == 921600
+    assert video_properties.resolution.width == 1280
+    assert video_properties.resolution.height == 720
+    assert video_properties.resolution.area == 921600
 
+    assert str(video_properties.resolution) == '1280x720'
 
-def test_get_video_bitrate(video_720p_2mb_mp4: Path):
-    bitrate = get_video_bitrate(video_720p_2mb_mp4)
-
-    assert bitrate == 842
-
-
-def test_get_video_frame_rate(video_720p_2mb_mp4: Path):
-    frame_rate = get_video_frame_rate(video_720p_2mb_mp4)
-
-    assert frame_rate == 25.0
+    assert video_properties.bitrate_kbytes == 842
+    assert video_properties.frame_rate == 25.0

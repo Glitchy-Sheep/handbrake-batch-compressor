@@ -26,52 +26,35 @@ class VideoResolution(BaseModel):
         return self.width * self.height
 
 
-def get_video_resolution(video_path: str) -> VideoResolution:
+class VideoProperties(BaseModel):
+    """Basic video properties. (resolution, frame rate, bitrate)"""
+
+    resolution: VideoResolution
+    frame_rate: int
+    bitrate_kbytes: int
+
+
+def get_video_properties(video_path: str) -> VideoProperties | None:
     """
-    Get the resolution of a video as a VideoResolution object.
+    Get the resolution, frame rate and bitrate of a video as a VideoProperties object.
 
-    If, for some reason, the resolution can't be determined, return None.
-    """
-    try:
-        probe = av.open(video_path)
-        width = probe.streams.video[0].width
-        height = probe.streams.video[0].height
-        probe.close()
-        return VideoResolution(width=width, height=height)
-    except (av.error.InvalidDataError, IndexError) as e:
-        log.error(f'Error getting video resolution: {e}')
-        return None
-
-
-def get_video_bitrate(video_path: str) -> int:
-    """
-    Get the bitrate of a video in kbits.
-
-    If, for some reason, the bitrate can't be determined, return None.
+    If, for some reason, any of this properties can't be determined, return None.
     """
     try:
         probe = av.open(video_path)
-        bitrate = probe.streams.video[0].codec_context.bit_rate // 1024
+        stream = probe.streams.video[0]
+        resolution = VideoResolution(
+            width=stream.width,
+            height=stream.height,
+        )
+        frame_rate = stream.codec_context.framerate
+        bitrate_kbytes = stream.codec_context.bit_rate // 1024
         probe.close()
+        return VideoProperties(
+            resolution=resolution,
+            frame_rate=frame_rate,
+            bitrate_kbytes=bitrate_kbytes,
+        )
     except (av.error.InvalidDataError, IndexError) as e:
-        log.error(f'Error getting video bitrate: {e}')
+        log.error(f'Error getting video properties: {e}')
         return None
-    else:
-        return bitrate
-
-
-def get_video_frame_rate(video_path: str) -> float:
-    """
-    Get the frame rate of a video in frames per second.
-
-    If, for some reason, the frame rate can't be determined, return None.
-    """
-    try:
-        probe = av.open(video_path)
-        frame_rate = probe.streams.video[0].codec_context.framerate
-        probe.close()
-    except (av.error.InvalidDataError, IndexError) as e:
-        log.error(f'Error getting video frame rate: {e}')
-        return None
-    else:
-        return frame_rate
