@@ -4,6 +4,8 @@ The module provides functions to get the resolution of a video.
 It will be used for smart filters.
 """
 
+import functools
+
 import av
 from pydantic import BaseModel
 
@@ -17,6 +19,7 @@ class InvalidResolutionError(Exception):
         super().__init__(f'Invalid resolution: {resolution}')
 
 
+@functools.total_ordering
 class VideoResolution(BaseModel):
     """Data class representing a video resolution."""
 
@@ -26,6 +29,16 @@ class VideoResolution(BaseModel):
     def __str__(self) -> str:
         """Resolution representation e.g: 1280x720."""
         return f'{self.width}x{self.height}'
+
+    def __eq__(self, other: object) -> bool:
+        if not isinstance(other, VideoResolution):
+            return False
+        return self.width == other.width and self.height == other.height
+
+    def __lt__(self, other: object) -> bool:
+        if not isinstance(other, VideoResolution):
+            return False
+        return self.area < other.area
 
     @property
     def area(self) -> int:
@@ -71,11 +84,12 @@ def get_video_properties(video_path: str) -> VideoProperties | None:
         frame_rate = stream.codec_context.framerate
         bitrate_kbytes = stream.codec_context.bit_rate // 1024
         probe.close()
+    except (av.error.InvalidDataError, IndexError) as e:
+        log.error(f'Error getting video properties: {e}')
+        return None
+    else:
         return VideoProperties(
             resolution=resolution,
             frame_rate=frame_rate,
             bitrate_kbytes=bitrate_kbytes,
         )
-    except (av.error.InvalidDataError, IndexError) as e:
-        log.error(f'Error getting video properties: {e}')
-        return None
