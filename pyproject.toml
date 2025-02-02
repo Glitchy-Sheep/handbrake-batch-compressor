@@ -25,6 +25,7 @@ pyinstaller = "^6.11.1"
 ruff = "^0.9.4"
 
 # ---------------- RUFF Linter ---------------- 
+coverage = "^7.6.10"
 [tool.ruff]
 # match black
 line-length = 88
