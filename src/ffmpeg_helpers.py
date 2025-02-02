@@ -38,6 +38,40 @@ def get_video_resolution(video_path: str) -> VideoResolution:
         height = probe.streams.video[0].height
         probe.close()
         return VideoResolution(width=width, height=height)
-    except (av.error.InvalidDataError, av.error.MediaTypeError, IndexError) as e:
+    except (av.error.InvalidDataError, IndexError) as e:
         log.error(f'Error getting video resolution: {e}')
         return None
+
+
+def get_video_bitrate(video_path: str) -> int:
+    """
+    Get the bitrate of a video in kbits.
+
+    If, for some reason, the bitrate can't be determined, return None.
+    """
+    try:
+        probe = av.open(video_path)
+        bitrate = probe.streams.video[0].codec_context.bit_rate // 1024
+        probe.close()
+    except (av.error.InvalidDataError, IndexError) as e:
+        log.error(f'Error getting video bitrate: {e}')
+        return None
+    else:
+        return bitrate
+
+
+def get_video_frame_rate(video_path: str) -> float:
+    """
+    Get the frame rate of a video in frames per second.
+
+    If, for some reason, the frame rate can't be determined, return None.
+    """
+    try:
+        probe = av.open(video_path)
+        frame_rate = probe.streams.video[0].codec_context.framerate
+        probe.close()
+    except (av.error.InvalidDataError, IndexError) as e:
+        log.error(f'Error getting video frame rate: {e}')
+        return None
+    else:
+        return frame_rate
