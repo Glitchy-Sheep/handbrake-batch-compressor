@@ -16,7 +16,7 @@ from src.cli_guards import (
 from src.ffmpeg_helpers import VideoResolution
 from src.files import get_video_files_paths
 from src.logger import log
-from src.smart_filters import FilterPriorities, SmartFilter
+from src.smart_filters import SmartFilter
 from src.third_party_installers import setup_software
 
 app = typer.Typer(
@@ -120,13 +120,6 @@ def main(  # noqa: PLR0913: too many arguments because of typer
             parser=VideoResolution.parse_resolution,
         ),
     ] = None,
-    filter_priority: Annotated[
-        FilterPriorities,
-        typer.Option(
-            '--filter-priority',
-            help='The priority of the filters. Higher values mean more strict filters.',
-        ),
-    ] = FilterPriorities.STRICT.value,
 ) -> None:
     """
     Compress your video files in batch with HandbrakeCLI.
@@ -194,7 +187,6 @@ def main(  # noqa: PLR0913: too many arguments because of typer
         log.success(f'Removed {len(incomplete_files)} incomplete files. 🧹✨')
 
     smart_filter = SmartFilter(
-        filter_priority=filter_priority,
         minimal_resolution=filter_min_resolution,
         minimal_bitrate_kbytes=filter_min_bitrate,
         minimal_frame_rate=filter_min_frame_rate,

@@ -4,10 +4,9 @@ The module provides functions to apply smart filters on the videos.
 It will be used to skip some files according to their properties like resolution, audio channels, etc.
 """
 
-from enum import Enum
 from pathlib import Path
 
-from src.ffmpeg_helpers import VideoProperties, VideoResolution, get_video_properties
+from src.ffmpeg_helpers import VideoResolution, get_video_properties
 
 
 class NotAFileError(Exception):
@@ -15,14 +14,6 @@ class NotAFileError(Exception):
 
     def __init__(self, video_path: Path) -> None:
         super().__init__(f'{video_path} is not a file.')
-
-
-class FilterPriorities(Enum):
-    """Enum class to represent the priorities of the filters."""
-
-    BITRATE = 'bitrate'
-    QUALITY = 'quality'
-    STRICT = 'strict'
 
 
 class SmartFilter:
@@ -40,26 +31,22 @@ class SmartFilter:
         minimal_resolution: VideoResolution = None,
         minimal_bitrate_kbytes: int | None = None,
         minimal_frame_rate: int | None = None,
-        filter_priority: FilterPriorities = FilterPriorities.STRICT,
     ) -> None:
         self.minimal_resolution = minimal_resolution
         self.minimal_bitrate_kbytes = minimal_bitrate_kbytes
         self.minimal_frame_rate = minimal_frame_rate
-        self.filter_priority = filter_priority
 
     def should_compress(self, video_path: Path) -> bool:
         if not video_path.is_file():
             raise NotAFileError(video_path)
 
-        video_properties: VideoProperties = get_video_properties(video_path)
+        video_properties = get_video_properties(video_path)
         if video_properties is None:
             return False
 
         actual_resolution = video_properties.resolution
         actual_bitrate_kbytes = video_properties.bitrate_kbytes
         actual_frame_rate = video_properties.frame_rate
-
-        strict_filter_min_match = len(FilterPriorities)
 
         exceeds_bitrate = (
             self.minimal_bitrate_kbytes is None
@@ -74,14 +61,9 @@ class SmartFilter:
             or actual_resolution >= self.minimal_resolution
         )
 
-        if self.filter_priority == FilterPriorities.BITRATE:
-            return exceeds_bitrate
-        if self.filter_priority == FilterPriorities.QUALITY:
-            return exceeds_frame_rate or exceeds_resolution
-        if self.filter_priority == FilterPriorities.STRICT:
-            return (
-                sum([exceeds_bitrate, exceeds_frame_rate, exceeds_resolution])
-                == strict_filter_min_match
-            )
+        count_of_filters = 3
 
-        return False
+        return (
+            sum([exceeds_bitrate, exceeds_frame_rate, exceeds_resolution])
+            == count_of_filters
+        )
