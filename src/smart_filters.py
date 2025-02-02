@@ -16,6 +16,15 @@ class NotAFileError(Exception):
         super().__init__(f'{video_path} is not a file.')
 
 
+class VideoIsCorruptedError(Exception):
+    """Exception raised when the video properties are unknown (corrupted video)."""
+
+    def __init__(self, video_path: Path) -> None:
+        super().__init__(
+            f"Can't get video properties for {video_path}, video is considered corrupted.",
+        )
+
+
 class SmartFilter:
     """
     Smart filter determines whether a video should be compressed or not.
@@ -42,7 +51,7 @@ class SmartFilter:
 
         video_properties = get_video_properties(video_path)
         if video_properties is None:
-            return False
+            raise VideoIsCorruptedError(video_path)
 
         actual_resolution = video_properties.resolution
         actual_bitrate_kbytes = video_properties.bitrate_kbytes

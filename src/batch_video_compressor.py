@@ -30,7 +30,7 @@ from src.handbrake_cli_output_capturer import (
     parse_handbrake_cli_output,
 )
 from src.logger import log
-from src.smart_filters import SmartFilter
+from src.smart_filters import SmartFilter, VideoIsCorruptedError
 
 
 class BatchVideoCompressor:
@@ -190,10 +190,18 @@ class BatchVideoCompressor:
                     video.parent / f'{video.stem}.{self.progress_ext}{video.suffix}'
                 ).absolute()
 
-                if not self.smart_filter.should_compress(video):
-                    log.info(f'Skipping {video.name} (smart filter)')
+                # Apply smart filter
+                try:
+                    should_compress = self.smart_filter.should_compress(video)
+                except VideoIsCorruptedError:
+                    log.error(f'{video.name} is considered corrupted')
                     self.statistics.skip_file(video)
                     continue
+                else:
+                    if not should_compress:
+                        log.info(f'Skipping {video.name} (smart filter)')
+                        self.statistics.skip_file(video)
+                        continue
 
                 # Compress
                 self.compress_video(
