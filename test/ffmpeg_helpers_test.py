@@ -14,7 +14,7 @@ def test_get_video_resolution(video_720p_2mb_mp4: Path):
 
     assert str(video_properties.resolution) == '1280x720'
 
-    assert video_properties.bitrate_kbytes == 842
+    assert video_properties.bitrate_kbytes == 1219
     assert video_properties.frame_rate == 25.0
 
 

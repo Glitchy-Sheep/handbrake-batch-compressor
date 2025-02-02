@@ -93,7 +93,7 @@ def get_video_properties(video_path: str) -> VideoProperties | None:
             height=stream.height,
         )
         frame_rate = stream.codec_context.framerate
-        bitrate_kbytes = stream.codec_context.bit_rate // 1024
+        bitrate_kbytes = probe.bit_rate // 1024
         probe.close()
     except (av.error.InvalidDataError, IndexError) as e:
         log.error(f'Error getting video properties: {e}')
