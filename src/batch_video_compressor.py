@@ -24,19 +24,21 @@ from rich.markup import escape
 from rich.progress import Progress
 
 from src.compression_statistics import CompressionStatistics, FileStatistics
+from src.ffmpeg_helpers import get_video_properties
 from src.files import human_readable_size
 from src.handbrake_cli_output_capturer import (
     HandbrakeProgressInfo,
     parse_handbrake_cli_output,
 )
 from src.logger import log
+from src.smart_filters import SmartFilter
 
 
 class BatchVideoCompressor:
     """Main class for compressing videos."""
 
-    def __init__(
-        self,
+    def __init__(  # noqa: PLR0913 : too many arguments is ok here
+        self,  # but we probably need to refactor it somehow.
         video_files: set[Path],
         *,
         show_stats: bool = False,
@@ -44,6 +46,7 @@ class BatchVideoCompressor:
         progress_ext: str = 'compressing',
         complete_ext: str = 'compressed',
         handbrakecli_options: str = '',
+        smart_filter: SmartFilter,
     ) -> None:
         self.progress_ext = progress_ext
         self.complete_ext = complete_ext
@@ -53,6 +56,7 @@ class BatchVideoCompressor:
         self.handbrake_cli_options = handbrakecli_options
 
         self.statistics = CompressionStatistics()
+        self.smart_filter = smart_filter
 
     def log_stats(self, info: FileStatistics | None = None) -> None:
         """Log the compression stats for the given file or overall stats if info is not provided."""
@@ -83,6 +87,8 @@ class BatchVideoCompressor:
                 f'Overall stats: {compression_rate} (size: {init_size} -> {final_size})',
                 highlight=False,
             )
+            if self.statistics.overall_stats.files_skipped > 0:
+                log.info(f'Skipped {self.statistics.overall_stats.files_skipped} files')
 
     def compress_video(
         self,
@@ -184,6 +190,22 @@ class BatchVideoCompressor:
                 output_video = (
                     video.parent / f'{video.stem}.{self.progress_ext}{video.suffix}'
                 ).absolute()
+
+                # Apply smart filter
+                video_properties = get_video_properties(video)
+                if video_properties is None:
+                    log.error(
+                        f'{video.name} is considered corrupted and will be skipped.',
+                    )
+                    self.statistics.skip_file(video)
+                    continue
+
+                should_compress = self.smart_filter.should_compress(video_properties)
+
+                if not should_compress:
+                    log.info(f'Skipping {video.name} (smart filter)')
+                    self.statistics.skip_file(video)
+                    continue
 
                 # Compress
                 self.compress_video(

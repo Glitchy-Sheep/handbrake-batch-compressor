@@ -4,12 +4,22 @@ The module provides functions to get the resolution of a video.
 It will be used for smart filters.
 """
 
+import functools
+
 import av
 from pydantic import BaseModel
 
 from src.logger import log
 
 
+class InvalidResolutionError(Exception):
+    """Exception raised for an invalid resolution."""
+
+    def __init__(self, resolution: str) -> None:
+        super().__init__(f'Invalid resolution: {resolution}')
+
+
+@functools.total_ordering
 class VideoResolution(BaseModel):
     """Data class representing a video resolution."""
 
@@ -20,24 +30,77 @@ class VideoResolution(BaseModel):
         """Resolution representation e.g: 1280x720."""
         return f'{self.width}x{self.height}'
 
+    def __eq__(self, other: object) -> bool:
+        """
+        Compare two resolutions for equality.
+
+        Two resolutions are equal if their width and height are equal.
+        """
+        if not isinstance(other, VideoResolution):
+            return False
+        return self.width == other.width and self.height == other.height
+
+    def __lt__(self, other: object) -> bool:
+        """
+        Compare two resolutions for being one less than the other.
+
+        The comparison is done by comparing the area of the resolutions.
+        For example, 1280x720 is less than 1280x719. (By 1280 pixels)
+        """
+        if not isinstance(other, VideoResolution):
+            return False
+        return self.area < other.area
+
     @property
     def area(self) -> int:
         """Calculate the area of the video resolution."""
         return self.width * self.height
 
+    @staticmethod
+    def parse_resolution(resolution: str) -> 'VideoResolution':
+        if 'x' not in resolution:
+            raise InvalidResolutionError(resolution)
 
-def get_video_resolution(video_path: str) -> VideoResolution:
+        width, height = resolution.split('x')
+        width = int(width)
+        height = int(height)
+
+        if width < 0 or height < 0:
+            raise InvalidResolutionError(resolution)
+
+        return VideoResolution(width=width, height=height)
+
+
+class VideoProperties(BaseModel):
+    """Basic video properties. (resolution, frame rate, bitrate)"""
+
+    resolution: VideoResolution
+    frame_rate: int
+    bitrate_kbytes: int
+
+
+def get_video_properties(video_path: str) -> VideoProperties | None:
     """
-    Get the resolution of a video as a VideoResolution object.
+    Get the resolution, frame rate and bitrate of a video as a VideoProperties object.
 
-    If, for some reason, the resolution can't be determined, return None.
+    If, for some reason, any of this properties can't be determined, return None.
     """
     try:
         probe = av.open(video_path)
-        width = probe.streams.video[0].width
-        height = probe.streams.video[0].height
+        stream = probe.streams.video[0]
+        resolution = VideoResolution(
+            width=stream.width,
+            height=stream.height,
+        )
+        frame_rate = stream.codec_context.framerate
+        bitrate_kbytes = probe.bit_rate // 1024
         probe.close()
-        return VideoResolution(width=width, height=height)
-    except (av.error.InvalidDataError, av.error.MediaTypeError, IndexError) as e:
-        log.error(f'Error getting video resolution: {e}')
+    except (av.error.InvalidDataError, IndexError) as e:
+        log.error(f'Error getting video properties: {e}')
         return None
+    else:
+        return VideoProperties(
+            resolution=resolution,
+            frame_rate=frame_rate,
+            bitrate_kbytes=bitrate_kbytes,
+        )
