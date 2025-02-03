@@ -24,13 +24,14 @@ from rich.markup import escape
 from rich.progress import Progress
 
 from src.compression_statistics import CompressionStatistics, FileStatistics
+from src.ffmpeg_helpers import get_video_properties
 from src.files import human_readable_size
 from src.handbrake_cli_output_capturer import (
     HandbrakeProgressInfo,
     parse_handbrake_cli_output,
 )
 from src.logger import log
-from src.smart_filters import SmartFilter, VideoIsCorruptedError
+from src.smart_filters import SmartFilter
 
 
 class BatchVideoCompressor:
@@ -191,17 +192,20 @@ class BatchVideoCompressor:
                 ).absolute()
 
                 # Apply smart filter
-                try:
-                    should_compress = self.smart_filter.should_compress(video)
-                except VideoIsCorruptedError:
-                    log.error(f'{video.name} is considered corrupted')
+                video_properties = get_video_properties(video)
+                if video_properties is None:
+                    log.error(
+                        f'{video.name} is considered corrupted and will be skipped.',
+                    )
                     self.statistics.skip_file(video)
                     continue
-                else:
-                    if not should_compress:
-                        log.info(f'Skipping {video.name} (smart filter)')
-                        self.statistics.skip_file(video)
-                        continue
+
+                should_compress = self.smart_filter.should_compress(video_properties)
+
+                if not should_compress:
+                    log.info(f'Skipping {video.name} (smart filter)')
+                    self.statistics.skip_file(video)
+                    continue
 
                 # Compress
                 self.compress_video(

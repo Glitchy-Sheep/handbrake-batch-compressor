@@ -4,25 +4,7 @@ The module provides functions to apply smart filters on the videos.
 It will be used to skip some files according to their properties like resolution, audio channels, etc.
 """
 
-from pathlib import Path
-
-from src.ffmpeg_helpers import VideoResolution, get_video_properties
-
-
-class NotAFileError(Exception):
-    """Exception raised when a video_path is not a file."""
-
-    def __init__(self, video_path: Path) -> None:
-        super().__init__(f'{video_path} is not a file.')
-
-
-class VideoIsCorruptedError(Exception):
-    """Exception raised when the video properties are unknown (corrupted video)."""
-
-    def __init__(self, video_path: Path) -> None:
-        super().__init__(
-            f"Can't get video properties for {video_path}, video is considered corrupted.",
-        )
+from src.ffmpeg_helpers import VideoProperties, VideoResolution
 
 
 class SmartFilter:
@@ -45,14 +27,7 @@ class SmartFilter:
         self.minimal_bitrate_kbytes = minimal_bitrate_kbytes
         self.minimal_frame_rate = minimal_frame_rate
 
-    def should_compress(self, video_path: Path) -> bool:
-        if not video_path.is_file():
-            raise NotAFileError(video_path)
-
-        video_properties = get_video_properties(video_path)
-        if video_properties is None:
-            raise VideoIsCorruptedError(video_path)
-
+    def should_compress(self, video_properties: VideoProperties) -> bool:
         actual_resolution = video_properties.resolution
         actual_bitrate_kbytes = video_properties.bitrate_kbytes
         actual_frame_rate = video_properties.frame_rate
