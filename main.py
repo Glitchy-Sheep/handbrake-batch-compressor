@@ -120,6 +120,14 @@ def main(  # noqa: PLR0913: too many arguments because of typer
             parser=VideoResolution.parse_resolution,
         ),
     ] = None,
+    keep_only_smaller: Annotated[
+        bool,
+        typer.Option(
+            '--keep-only-smaller',
+            '-k',
+            help='Should only videos smaller than the original be kept.',
+        ),
+    ] = False,
 ) -> None:
     """
     Compress your video files in batch with HandbrakeCLI.
@@ -200,6 +208,7 @@ def main(  # noqa: PLR0913: too many arguments because of typer
         complete_ext=complete_ext,
         handbrakecli_options=handbrakecli_options,
         smart_filter=smart_filter,
+        keep_only_smaller=keep_only_smaller,
     )
     compressor.compress_videos()
 

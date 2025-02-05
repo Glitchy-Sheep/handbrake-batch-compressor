@@ -1,3 +1,7 @@
+# 0.3.0
+
+- Add argument to skip unefficient file compression.
+
 # 0.2.0:
 
 - Add smart filters to skip unwanted files.

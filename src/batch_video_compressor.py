@@ -47,6 +47,7 @@ class BatchVideoCompressor:
         complete_ext: str = 'compressed',
         handbrakecli_options: str = '',
         smart_filter: SmartFilter,
+        keep_only_smaller: bool = False,
     ) -> None:
         self.progress_ext = progress_ext
         self.complete_ext = complete_ext
@@ -54,6 +55,7 @@ class BatchVideoCompressor:
         self.show_stats = show_stats
         self.delete_original_files = delete_original_files
         self.handbrake_cli_options = handbrakecli_options
+        self.keep_only_smaller = keep_only_smaller
 
         self.statistics = CompressionStatistics()
         self.smart_filter = smart_filter
@@ -223,7 +225,20 @@ class BatchVideoCompressor:
                     self.progress_ext,
                     self.complete_ext,
                 )
-                output_video.rename(video.parent / f'{completed_stem}{video.suffix}')
+
+                output_video = output_video.rename(
+                    video.parent / f'{completed_stem}{video.suffix}',
+                )
+
+                if self.keep_only_smaller:
+                    input_size = input_video.stat().st_size
+                    output_size = output_video.stat().st_size
+
+                    if output_size >= input_size:
+                        self.statistics.skip_file(output_video)
+                        output_video.unlink()
+                        log.info(f'Removed {output_video.name} (larger than original)')
+                        continue
 
                 if self.delete_original_files and input_video.exists():
                     input_video.unlink()
