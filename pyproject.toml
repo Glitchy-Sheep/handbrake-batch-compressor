@@ -1,6 +1,6 @@
 [project]
 name = "batch-video-compressor"
-version = "0.3.0"
+version = "0.3.1"
 description = "Simple script to traverse all the video files and compress them to optimize disk space for large files"
 authors = [
     { name = "Roman Berezkin", email = "Glitchy-Sheep@users.noreply.github.com" },
@@ -40,6 +40,7 @@ ignore = [
     "D400",   # first line should end with a period (sometimes mess with markdown or code blocks)
     "D415",   # first line should end with a period (same as above but trickier)
     "RUF001", # unused variable
+    "G004",   # don't log f-strings (personal preference)
 ]
 
 [tool.ruff.lint.per-file-ignores]

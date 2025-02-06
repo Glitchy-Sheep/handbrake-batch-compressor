@@ -8,7 +8,7 @@ from rich.console import Console
 from rich.logging import RichHandler
 
 is_terminal = sys.stdout.isatty()
-if not is_terminal and not "pytest" in sys.modules:
+if not is_terminal and 'pytest' not in sys.modules:
     sys.stdout = io.TextIOWrapper(
         sys.stdout.detach(),
         encoding='utf-8',

@@ -1,6 +1,6 @@
 import datetime
 
-from src.handbrake_cli_output_capturer import (
+from src.cli.handbrake_cli_output_capturer import (
     parse_handbrake_cli_output,
 )
 

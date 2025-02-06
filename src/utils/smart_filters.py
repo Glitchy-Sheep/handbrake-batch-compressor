@@ -4,7 +4,7 @@ The module provides functions to apply smart filters on the videos.
 It will be used to skip some files according to their properties like resolution, audio channels, etc.
 """
 
-from src.ffmpeg_helpers import VideoProperties, VideoResolution
+from src.utils.ffmpeg_helpers import VideoProperties, VideoResolution
 
 
 class SmartFilter:

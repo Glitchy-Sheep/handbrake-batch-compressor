@@ -1,4 +1,4 @@
-from src.files import get_video_files_paths, human_readable_size
+from src.utils.files import get_video_files_paths, human_readable_size
 from test.conftest import VideoSampleData
 
 

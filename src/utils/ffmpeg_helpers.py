@@ -9,8 +9,6 @@ import functools
 import av
 from pydantic import BaseModel
 
-from src.logger import log
-
 
 class InvalidResolutionError(Exception):
     """Exception raised for an invalid resolution."""
@@ -95,8 +93,7 @@ def get_video_properties(video_path: str) -> VideoProperties | None:
         frame_rate = stream.codec_context.framerate
         bitrate_kbytes = probe.bit_rate // 1024
         probe.close()
-    except (av.error.InvalidDataError, IndexError) as e:
-        log.error(f'Error getting video properties: {e}')
+    except (av.error.InvalidDataError, IndexError):
         return None
     else:
         return VideoProperties(
