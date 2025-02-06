@@ -14,6 +14,7 @@ from src.cli.cli_guards import (
     check_handbrakecli_options,
     check_target_path,
 )
+from src.cli.guide import show_guide_and_exit
 from src.cli.logger import log
 from src.compression.compression_manager import (
     CompressionManager,
@@ -47,13 +48,13 @@ def remove_incomplete_files(incomplete_files: set[Path]) -> None:
 @app.command()
 def main(  # noqa: PLR0913: too many arguments because of typer
     target_path: Annotated[
-        Path,
+        Path | None,
         typer.Option(
             '--target-path',
             '-t',
             help='The path where your videos are.',
         ),
-    ],
+    ] = None,
     handbrakecli_options: Annotated[
         str,
         typer.Option(
@@ -121,6 +122,7 @@ def main(  # noqa: PLR0913: too many arguments because of typer
             '-r',
             help='The minimum resolution. Videos below this threshold will be skipped.',
             parser=VideoResolution.parse_resolution,
+            metavar='<WIDTH>x<HEIGHT>',
         ),
     ] = None,
     keep_only_smaller: Annotated[
@@ -128,30 +130,42 @@ def main(  # noqa: PLR0913: too many arguments because of typer
         typer.Option(
             '--keep-only-smaller',
             '-k',
-            help='Should only videos smaller than the original be kept.',
+            help='Should only videos smaller than the original be kept. If used with -d and files are larger than the original, they will [bold]not be deleted.[/bold]',
+        ),
+    ] = False,
+    # ---------- HandbrakeCLI options guide ----------
+    guide: Annotated[
+        bool,
+        typer.Option(
+            '--guide',
+            '-g',
+            help='Show compression guide and exit. See it if you are not sure what to do.',
         ),
     ] = False,
 ) -> None:
     """
     Compress your video files in batch with HandbrakeCLI.
 
-    1. Set `--target-path` to the directory containing your videos.
-    2. The utility will compress all video files in it recursively.
-
-    Use `--delete-original-files` to replace the original files with compressed ones.
-    ⚠ [bold red]Be cautious![/bold red] This deletes the original videos right after compression.
-
-    The utility uses file extensions to skip already compressed videos.
-    Customize with `--progress-extension` and `--complete-extension` (ensure they are unique and do not contain dots).
-
     [bold green]Examples:[/bold green]
     1. Compress all videos in `./videos` and delete originals:
     - [bold] ./main.py -t ./videos -d [/bold]
     2. Compress files with custom encoder and quality:
-    - [bold] ./main.py -t ./videos --handbrakecli-options "--encoder qsv_h264 --quality 20" [/bold]
+    - [bold] ./main.py -t ./videos -o "--encoder qsv_h264 --quality 20" [/bold]
     3. Compress using a preset:
-    - [bold] ./main.py -t ./videos --handbrakecli-options "--preset 'Fast 720p30'" [/bold]
+    - [bold] ./main.py -t ./videos -o "--preset 'Fast 720p30'" [/bold]
+    4. Compress files and leave only those smaller than the original and show stats:
+    - [bold] ./main.py -t ./videos -k -s [/bold]
+    5. Compress files excluding files with resolution and bitrate lower than the specified ones:
+    - [bold] ./main.py -t ./videos --filter-min-resolution 720x480 --filter-min-bitrate 100 [/bold]
     """
+    if guide:
+        show_guide_and_exit()
+        return
+
+    if target_path is None:
+        log.error('You must specify a target path. (See [bold]--help)[/bold]')
+        sys.exit(1)
+
     check_target_path(target_path)
     check_extensions_arguments(progress_ext, complete_ext)
     check_handbrakecli_options(handbrakecli_options)

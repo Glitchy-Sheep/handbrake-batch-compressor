@@ -1,3 +1,7 @@
+# 0.4.0
+
+- Add --guide argument to show basic information about the compression options.
+
 # 0.3.2
 
 - Add strict type checking with pyright and fix all the type errors.
