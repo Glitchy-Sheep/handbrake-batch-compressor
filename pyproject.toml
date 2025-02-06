@@ -24,3 +24,13 @@ pytest = "^8.3.4"
 pyinstaller = "^6.11.1"
 ruff = "^0.9.4"
 coverage = "^7.6.10"
+
+[tool.poetry]
+name = "batch-video-compressor"
+version = "0.4.0"
+description = "Simple script to traverse all the video files and compress them to optimize disk space for large files"
+authors = [
+    { name = "Roman Berezkin", email = "Glitchy-Sheep@users.noreply.github.com" },
+]
+readme = "README.md"
+requires-python = ">=3.10,<3.14"
