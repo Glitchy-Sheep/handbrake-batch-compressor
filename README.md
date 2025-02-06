@@ -3,15 +3,15 @@
     <img src="./assets/banner.png" style="width: 80%; "/>
 </p>
 
-# 🖥️ HandbrakeCLI Batch Compressor
+# 🖥️ About
 
-Welcome to the **Video Compressor** project! 
+Welcome to the **HandbrakeCLI Batch Compressor** project! 
 
 This application uses the **HandbrakeCLI** tool to compress video files in bulk. 
 
 
 ## 📑 Table of Contents
-- [🖥️ HandbrakeCLI Batch Compressor](#️-handbrakecli-batch-compressor)
+- [🖥️ About](#️-about)
   - [📑 Table of Contents](#-table-of-contents)
   - [🧐 Introduction](#-introduction)
   - [✨ Features](#-features)
@@ -40,6 +40,7 @@ deletion of original files, show statistics during and after the compression, et
 - **Filter Features**: Smart filters allow skipping videos that don't meet your criteria (e.g., resolution, bitrate, or frame rate).
 - **Statistics**: Optionally display compression stats during and after the process.
 - **Replace Original Files**: Automatically delete original files if they are successfully compressed.
+- **Automatic Installation**: Automatically install HandbrakeCLI and dependencies if not already installed.
 
 ## 📸 Screenshots
 
