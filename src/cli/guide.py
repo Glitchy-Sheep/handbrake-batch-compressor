@@ -32,6 +32,13 @@ This guide helps you configure HandBrake CLI settings for optimal video compress
     The higher the --quality value, the stronger the compression (smaller file size), but the lower the quality.
     (See https://handbrake.fr/docs/en/latest/workflow/adjust-quality.html)
 
+    [bold green]CRF (--quality)             File Size[/bold green]
+    18-20   Without losses      🟥 Big
+    21-23   Great quality       🟧 Medium
+    24-26   Good quality        🟨 Small
+    27-30   Acceptable quality  🟩 Tiny
+    31+     Strong artifacts    🟦 Very tiny
+
 [bold green]About encoders and presets[/bold green]:
 
   [bold]What it is:[/bold] An encoder is a tool that compresses video into a specific format (e.g., H.264, H.265).
@@ -60,12 +67,8 @@ This guide helps you configure HandBrake CLI settings for optimal video compress
 
   [bold]-o "--encoder YOUR_BEST_ENCODER --quality 30 --preset 'Very Fast 720p30'"[/bold]
 
-  It has optimal 30fps with 720p resolution.
-  The quality 30 is a good compromise between quality and size.
+  These setting is a good compromise between quality and size.
   But you need to set your own encoder (see [bold green]GPU vs CPU[/bold green] above).
-
-  [bold]My advice is to not touch bitrate/resolution/fps manually[/bold] and use the quality/presets.
-  Because you can use incompatible bitrate with some resolutions.
 """
 
 
