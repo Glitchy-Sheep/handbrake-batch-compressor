@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import sys
-from pathlib import Path
+from pathlib import Path  # noqa: TC003 - is used by typer
 from typing import Annotated
 
 import typer
@@ -32,13 +32,12 @@ app = typer.Typer(
 )
 
 
-def remove_incomplete_files(incomplete_files: set[str]) -> None:
+def remove_incomplete_files(incomplete_files: set[Path]) -> None:
     """Remove incomplete files and update the task queue."""
     for file in incomplete_files:
-        file_path = Path(file)
-        if file_path.exists():
+        if file.exists():
             try:
-                file_path.unlink()
+                file.unlink()
             except OSError as e:
                 log.error(f'Failed to remove file {file}: {e}')
         else:
@@ -169,9 +168,9 @@ def main(  # noqa: PLR0913: too many arguments because of typer
 
     log.success(f'Found {len(video_files)} video files.')
 
-    complete_files = set()
-    incomplete_files = set()
-    unprocessed_files = set()
+    complete_files: set[Path] = set()
+    incomplete_files: set[Path] = set()
+    unprocessed_files: set[Path] = set()
 
     for file in video_files:
         extensions = {x.replace('.', '') for x in file.suffixes}
