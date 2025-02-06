@@ -4,6 +4,8 @@ The module provides a function to parse Handbrake CLI output and return a Handbr
 This object contains the progress, current FPS, average FPS, and ETA.
 """
 
+from __future__ import annotations
+
 import datetime
 import re
 

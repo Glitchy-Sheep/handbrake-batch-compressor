@@ -31,6 +31,7 @@ class HandbrakeCompressor:
     ) -> bool:
         """
         Compress a single video file.
+
         Returns True if the compression was successful, False otherwise.
         """
         compress_cmd = [
@@ -39,7 +40,7 @@ class HandbrakeCompressor:
             str(input_video),
             '-o',
             str(output_video),
-            *split(self.handbrakecli_options, ' '),
+            *split(self.handbrakecli_options),
         ]
 
         stderr_log_filename = Path('last_compression.log')
@@ -54,9 +55,10 @@ class HandbrakeCompressor:
                 universal_newlines=True,
             )
 
-            for line in process.stdout:
-                info = parse_handbrake_cli_output(line)
-                on_update(info)
+            if process.stdout:
+                for line in process.stdout:
+                    info = parse_handbrake_cli_output(line)
+                    on_update(info)
 
             process.wait()
 

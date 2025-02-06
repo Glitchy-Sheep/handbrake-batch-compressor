@@ -10,7 +10,7 @@ from rich.logging import RichHandler
 is_terminal = sys.stdout.isatty()
 if not is_terminal and 'pytest' not in sys.modules:
     sys.stdout = io.TextIOWrapper(
-        sys.stdout.detach(),
+        sys.stdout.buffer,
         encoding='utf-8',
         line_buffering=True,
     )

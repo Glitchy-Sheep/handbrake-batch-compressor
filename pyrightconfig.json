@@ -15,12 +15,4 @@
     "reportMissingTypeStubs": false,
     "pythonVersion": "3.10",
     "pythonPlatform": "Windows",
-    "executionEnvironments": [
-        {
-            "root": "test",
-        },
-        {
-            "root": "src"
-        }
-    ]
 }
