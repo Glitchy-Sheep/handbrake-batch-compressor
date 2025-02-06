@@ -99,8 +99,8 @@ python main.py -t ./videos -o "--encoder x264 --quality 20" \
 ### 🎨 Examples
 
 <details>
-    <summary> 
-    <p style="color: #0066ff; font-weight: bold; cursor: pointer">[Expand for examples]<p>
+    <summary style="display: flex; align-items: center;"> 
+        <img src="./assets/expand-screenshots-badge.png" style="width: 300px; cursor: pointer"/>
     </summary>
 
 1. **Compress all videos in a directory and delete the originals:**
