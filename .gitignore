@@ -175,7 +175,7 @@ poetry.toml
 .ruff_cache/
 
 # LSP config files
-pyrightconfig.json
+# pyrightconfig.json Make those rules crucial to the project's quality
 
 # End of https://www.toptal.com/developers/gitignore/api/python
 
