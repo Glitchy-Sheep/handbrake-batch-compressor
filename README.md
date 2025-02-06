@@ -44,8 +44,8 @@ deletion of original files, show statistics during and after the compression, et
 
 ## 📸 Screenshots
 
-<img src="./assets/screenshot-1-compressing.png" style="width: 80%; "/>
-<img src="./assets/screenshot-2-nothing-to-do.png" style="width: 80%; "/>
+<img src="./assets/screenshot-1-compressing.png" style="width: 100%; "/>
+<img src="./assets/screenshot-2-nothing-to-do.png" style="width: 100%; "/>
 
 ## 🛠️ Installation
 
