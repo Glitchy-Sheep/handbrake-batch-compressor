@@ -4,7 +4,12 @@ The module provides functions to apply smart filters on the videos.
 It will be used to skip some files according to their properties like resolution, audio channels, etc.
 """
 
-from src.utils.ffmpeg_helpers import VideoProperties, VideoResolution
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from src.utils.ffmpeg_helpers import VideoProperties, VideoResolution
 
 
 class SmartFilter:
@@ -19,7 +24,7 @@ class SmartFilter:
 
     def __init__(
         self,
-        minimal_resolution: VideoResolution = None,
+        minimal_resolution: VideoResolution | None = None,
         minimal_bitrate_kbytes: int | None = None,
         minimal_frame_rate: int | None = None,
     ) -> None:

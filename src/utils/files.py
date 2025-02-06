@@ -17,7 +17,7 @@ supported_videofile_extensions = {
 }
 
 
-def human_readable_size(size: int, decimal_places: int = 2) -> str:
+def human_readable_size(size: float, decimal_places: int = 2) -> str:
     """
     Return a human-readable string representing the size of a file.
 
@@ -36,7 +36,7 @@ def human_readable_size(size: int, decimal_places: int = 2) -> str:
     return f'{size:.{decimal_places}f} PB'
 
 
-def get_video_files_paths(path: str) -> Generator[str, None, None]:
+def get_video_files_paths(path: Path) -> Generator[Path, None, None]:
     """Get all video files paths in a directory."""
     for root, _, files in os.walk(path):
         for file in files:

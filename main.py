@@ -1,5 +1,7 @@
 """Main module for the video compressor and the entry point for the CLI."""
 
+from __future__ import annotations
+
 import sys
 from pathlib import Path
 from typing import Annotated
@@ -25,14 +27,12 @@ from src.utils.third_party_installers import setup_software
 
 app = typer.Typer(
     no_args_is_help=True,
-    cls=True,
     add_completion=False,
-    rich_help_panel=True,
     rich_markup_mode='rich',
 )
 
 
-def remove_incomplete_files(incomplete_files: set[str]) -> int:
+def remove_incomplete_files(incomplete_files: set[str]) -> None:
     """Remove incomplete files and update the task queue."""
     for file in incomplete_files:
         file_path = Path(file)
@@ -116,7 +116,7 @@ def main(  # noqa: PLR0913: too many arguments because of typer
         ),
     ] = None,
     filter_min_resolution: Annotated[
-        VideoResolution,
+        VideoResolution | None,
         typer.Option(
             '--filter-min-resolution',
             '-r',

@@ -1,3 +1,7 @@
+# 0.3.2
+
+- Add strict type checking with pyright and fix all the type errors.
+
 # 0.3.1
 
 - Major refactor to make the code more maintainable, testable and reusable.

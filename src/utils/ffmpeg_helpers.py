@@ -4,10 +4,16 @@ The module provides functions to get the resolution of a video.
 It will be used for smart filters.
 """
 
+from __future__ import annotations
+
 import functools
+from typing import TYPE_CHECKING
 
 import av
 from pydantic import BaseModel
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 class InvalidResolutionError(Exception):
@@ -55,7 +61,7 @@ class VideoResolution(BaseModel):
         return self.width * self.height
 
     @staticmethod
-    def parse_resolution(resolution: str) -> 'VideoResolution':
+    def parse_resolution(resolution: str) -> VideoResolution:
         if 'x' not in resolution:
             raise InvalidResolutionError(resolution)
 
@@ -73,11 +79,11 @@ class VideoProperties(BaseModel):
     """Basic video properties. (resolution, frame rate, bitrate)"""
 
     resolution: VideoResolution
-    frame_rate: int
+    frame_rate: float
     bitrate_kbytes: int
 
 
-def get_video_properties(video_path: str) -> VideoProperties | None:
+def get_video_properties(video_path: Path) -> VideoProperties | None:
     """
     Get the resolution, frame rate and bitrate of a video as a VideoProperties object.
 
@@ -93,11 +99,11 @@ def get_video_properties(video_path: str) -> VideoProperties | None:
         frame_rate = stream.codec_context.framerate
         bitrate_kbytes = probe.bit_rate // 1024
         probe.close()
-    except (av.error.InvalidDataError, IndexError):
+    except (av.InvalidDataError, IndexError):
         return None
     else:
         return VideoProperties(
             resolution=resolution,
-            frame_rate=frame_rate,
+            frame_rate=float(frame_rate),
             bitrate_kbytes=bitrate_kbytes,
         )

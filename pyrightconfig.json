@@ -1,0 +1,19 @@
+{
+    "typeCheckingMode": "strict",
+    "include": [
+        "src"
+    ],
+    "exclude": [
+        "**/node_modules",
+        "**/__pycache__",
+        "**/dist",
+        "**/build"
+    ],
+    "defineConstant": {
+        "DEBUG": true
+    },
+    "reportMissingImports": "error",
+    "reportMissingTypeStubs": false,
+    "pythonVersion": "3.10",
+    "pythonPlatform": "Windows",
+}

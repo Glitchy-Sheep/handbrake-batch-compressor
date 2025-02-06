@@ -1,20 +1,26 @@
 """The module provides a class to manage the batch compression of videos."""
 
-from collections.abc import Callable
-from pathlib import Path
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
 from rich.progress import Progress
 
-from src.cli.handbrake_cli_output_capturer import (
-    HandbrakeProgressInfo,
-)
 from src.cli.logger import log
 from src.cli.statistics_logger import StatisticsLogger
 from src.compression.compression_statistics import CompressionStatistics
-from src.compression.handbrake_compressor import HandbrakeCompressor
 from src.utils.ffmpeg_helpers import get_video_properties
-from src.utils.smart_filters import SmartFilter
+
+if TYPE_CHECKING:
+    from collections.abc import Callable
+    from pathlib import Path
+
+    from src.cli.handbrake_cli_output_capturer import (
+        HandbrakeProgressInfo,
+    )
+    from src.compression.handbrake_compressor import HandbrakeCompressor
+    from src.utils.smart_filters import SmartFilter
 
 
 class CompressionManagerOptions(BaseModel):
@@ -113,7 +119,7 @@ class CompressionManager:
         success = self.compressor.compress(
             video,
             output_video,
-            on_update=on_progress_update,
+            on_update=on_progress_update or (lambda _: None),
         )
 
         if success:
