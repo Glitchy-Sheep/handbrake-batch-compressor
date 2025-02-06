@@ -1,6 +1,6 @@
 [project]
 name = "batch-video-compressor"
-version = "0.3.1"
+version = "0.3.2"
 description = "Simple script to traverse all the video files and compress them to optimize disk space for large files"
 authors = [
     { name = "Roman Berezkin", email = "Glitchy-Sheep@users.noreply.github.com" },
