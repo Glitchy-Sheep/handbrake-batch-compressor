@@ -1,3 +1,7 @@
+# 0.3.1
+
+- Major refactor to make the code more maintainable, testable and reusable.
+
 # 0.3.0
 
 - Add argument to skip unefficient file compression.
