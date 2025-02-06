@@ -7,17 +7,21 @@ from typing import Annotated
 import typer
 import typer.rich_utils
 
-from src.batch_video_compressor import BatchVideoCompressor
-from src.cli_guards import (
+from src.cli.cli_guards import (
     check_extensions_arguments,
     check_handbrakecli_options,
     check_target_path,
 )
-from src.ffmpeg_helpers import VideoResolution
-from src.files import get_video_files_paths
-from src.logger import log
-from src.smart_filters import SmartFilter
-from src.third_party_installers import setup_software
+from src.cli.logger import log
+from src.compression.compression_manager import (
+    CompressionManager,
+    CompressionManagerOptions,
+)
+from src.compression.handbrake_compressor import HandbrakeCompressor
+from src.utils.ffmpeg_helpers import VideoResolution
+from src.utils.files import get_video_files_paths
+from src.utils.smart_filters import SmartFilter
+from src.utils.third_party_installers import setup_software
 
 app = typer.Typer(
     no_args_is_help=True,
@@ -200,17 +204,20 @@ def main(  # noqa: PLR0913: too many arguments because of typer
         minimal_frame_rate=filter_min_frame_rate,
     )
 
-    compressor = BatchVideoCompressor(
-        show_stats=show_stats,
-        delete_original_files=delete_original_files,
+    compression_manager = CompressionManager(
         video_files=unprocessed_files,
-        progress_ext=progress_ext,
-        complete_ext=complete_ext,
-        handbrakecli_options=handbrakecli_options,
+        compressor=HandbrakeCompressor(handbrakecli_options=handbrakecli_options),
         smart_filter=smart_filter,
-        keep_only_smaller=keep_only_smaller,
+        options=CompressionManagerOptions(
+            show_stats=show_stats,
+            delete_original_files=delete_original_files,
+            keep_only_smaller=keep_only_smaller,
+            progress_ext=progress_ext,
+            complete_ext=complete_ext,
+        ),
     )
-    compressor.compress_videos()
+
+    compression_manager.compress_all_videos()
 
     log.success('Everything is done! 🎉')
 

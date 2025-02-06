@@ -1,6 +1,10 @@
 from pathlib import Path
 
-from src.ffmpeg_helpers import VideoProperties, VideoResolution, get_video_properties
+from src.utils.ffmpeg_helpers import (
+    VideoProperties,
+    VideoResolution,
+    get_video_properties,
+)
 
 
 def test_get_video_resolution(video_720p_2mb_mp4: Path):

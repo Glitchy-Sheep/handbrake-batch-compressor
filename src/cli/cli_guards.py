@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 from textwrap import dedent
 
-from src.logger import log
+from src.cli.logger import log
 
 
 def check_target_path(target_path: Path) -> None:

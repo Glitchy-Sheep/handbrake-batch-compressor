@@ -5,7 +5,7 @@ import subprocess
 
 from pydantic import BaseModel
 
-from src.logger import log
+from src.cli.logger import log
 
 
 class InstallCommand(BaseModel):

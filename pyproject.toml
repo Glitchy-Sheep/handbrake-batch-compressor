@@ -40,6 +40,7 @@ ignore = [
     "D400",   # first line should end with a period (sometimes mess with markdown or code blocks)
     "D415",   # first line should end with a period (same as above but trickier)
     "RUF001", # unused variable
+    "G004",   # don't log f-strings (personal preference)
 ]
 
 [tool.ruff.lint.per-file-ignores]

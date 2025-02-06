@@ -2,7 +2,7 @@ from pathlib import Path
 
 import pytest
 
-from src.compression_statistics import CompressionStatistics
+from src.compression.compression_statistics import CompressionStatistics
 
 
 @pytest.fixture
