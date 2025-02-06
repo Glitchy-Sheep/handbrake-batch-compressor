@@ -1,4 +1,5 @@
 {
+    "typeCheckingMode": "strict",
     "include": [
         "src"
     ],
