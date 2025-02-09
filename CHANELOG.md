@@ -1,3 +1,7 @@
+# 1.0.1
+
+- Fix readme pictures links to make it accessible on pypi.
+
 # 1.0.0
 
 - Add packaging with poetry.

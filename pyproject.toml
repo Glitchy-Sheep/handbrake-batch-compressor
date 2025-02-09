@@ -1,6 +1,6 @@
 [project]
 name = "handbrake-batch-compressor"
-version = "1.0.0"
+version = "1.0.1"
 description = "Simple script to traverse all the video files and compress them to optimize disk space for large files"
 authors = [
     { name = "Roman Berezkin", email = "Glitchy-Sheep@users.noreply.github.com" },
@@ -30,7 +30,7 @@ coverage = "^7.6.10"
 
 [tool.poetry]
 name = "handbrake-batch-compressor"
-version = "1.0.0"
+version = "1.0.1"
 description = "Simple script to traverse all the video files and compress them to optimize disk space for large files"
 authors = ["Roman Berezkin"]
 readme = "README.md"
