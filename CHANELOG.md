@@ -1,3 +1,7 @@
+# 1.0.0
+
+- Add packaging with poetry.
+
 # 0.4.0
 
 - Add --guide argument to show basic information about the compression options.
