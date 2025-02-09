@@ -17,6 +17,7 @@ ignore = [
 
 [lint.per-file-ignores]
 "test/*" = ["D", "ANN201", "S101", "PLR2004"]
+"__init__.py" = ["D104"]
 
 [format]
 quote-style = "single"
