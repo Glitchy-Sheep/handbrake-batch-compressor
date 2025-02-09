@@ -4,27 +4,26 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from pydantic import BaseModel
-from rich.progress import Progress
-
-from batch_video_compressor.src.cli.logger import log
-from batch_video_compressor.src.cli.statistics_logger import StatisticsLogger
-from batch_video_compressor.src.compression.compression_statistics import (
+from handbrake_batch_compressor.src.cli.logger import log
+from handbrake_batch_compressor.src.cli.statistics_logger import StatisticsLogger
+from handbrake_batch_compressor.src.compression.compression_statistics import (
     CompressionStatistics,
 )
-from batch_video_compressor.src.utils.ffmpeg_helpers import get_video_properties
+from handbrake_batch_compressor.src.utils.ffmpeg_helpers import get_video_properties
+from pydantic import BaseModel
+from rich.progress import Progress
 
 if TYPE_CHECKING:
     from collections.abc import Callable
     from pathlib import Path
 
-    from batch_video_compressor.src.cli.handbrake_cli_output_capturer import (
+    from handbrake_batch_compressor.src.cli.handbrake_cli_output_capturer import (
         HandbrakeProgressInfo,
     )
-    from batch_video_compressor.src.compression.handbrake_compressor import (
+    from handbrake_batch_compressor.src.compression.handbrake_compressor import (
         HandbrakeCompressor,
     )
-    from batch_video_compressor.src.utils.smart_filters import SmartFilter
+    from handbrake_batch_compressor.src.utils.smart_filters import SmartFilter
 
 
 class CompressionManagerOptions(BaseModel):

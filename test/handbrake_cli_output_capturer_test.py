@@ -1,6 +1,6 @@
 import datetime
 
-from batch_video_compressor.src.cli.handbrake_cli_output_capturer import (
+from handbrake_batch_compressor.src.cli.handbrake_cli_output_capturer import (
     parse_handbrake_cli_output,
 )
 

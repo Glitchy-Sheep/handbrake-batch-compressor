@@ -2,7 +2,7 @@
 
 import sys
 
-from batch_video_compressor.src.cli.logger import log
+from handbrake_batch_compressor.src.cli.logger import log
 
 GUIDE = """\
 

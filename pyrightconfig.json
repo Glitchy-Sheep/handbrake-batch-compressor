@@ -1,7 +1,7 @@
 {
     "typeCheckingMode": "strict",
     "include": [
-        "batch_video_compressor"
+        "handbrake_batch_compressor"
     ],
     "exclude": [
         "**/node_modules",

@@ -4,13 +4,12 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from handbrake_batch_compressor.src.utils.files import human_readable_size
 from rich.markup import escape
 
-from batch_video_compressor.src.utils.files import human_readable_size
-
 if TYPE_CHECKING:
-    from batch_video_compressor.src.cli.logger import AppLogger
-    from batch_video_compressor.src.compression.compression_statistics import (
+    from handbrake_batch_compressor.src.cli.logger import AppLogger
+    from handbrake_batch_compressor.src.compression.compression_statistics import (
         CompressionStatistics,
         FileStatistics,
     )

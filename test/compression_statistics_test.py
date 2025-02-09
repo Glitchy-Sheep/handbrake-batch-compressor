@@ -1,8 +1,7 @@
 from pathlib import Path
 
 import pytest
-
-from batch_video_compressor.src.compression.compression_statistics import (
+from handbrake_batch_compressor.src.compression.compression_statistics import (
     CompressionStatistics,
 )
 

@@ -9,24 +9,24 @@ from typing import Annotated
 import typer
 import typer.rich_utils
 
-from batch_video_compressor.src.cli.cli_guards import (
+from handbrake_batch_compressor.src.cli.cli_guards import (
     check_extensions_arguments,
     check_handbrakecli_options,
     check_target_path,
 )
-from batch_video_compressor.src.cli.guide import show_guide_and_exit
-from batch_video_compressor.src.cli.logger import log
-from batch_video_compressor.src.compression.compression_manager import (
+from handbrake_batch_compressor.src.cli.guide import show_guide_and_exit
+from handbrake_batch_compressor.src.cli.logger import log
+from handbrake_batch_compressor.src.compression.compression_manager import (
     CompressionManager,
     CompressionManagerOptions,
 )
-from batch_video_compressor.src.compression.handbrake_compressor import (
+from handbrake_batch_compressor.src.compression.handbrake_compressor import (
     HandbrakeCompressor,
 )
-from batch_video_compressor.src.utils.ffmpeg_helpers import VideoResolution
-from batch_video_compressor.src.utils.files import get_video_files_paths
-from batch_video_compressor.src.utils.smart_filters import SmartFilter
-from batch_video_compressor.src.utils.third_party_installers import setup_software
+from handbrake_batch_compressor.src.utils.ffmpeg_helpers import VideoResolution
+from handbrake_batch_compressor.src.utils.files import get_video_files_paths
+from handbrake_batch_compressor.src.utils.smart_filters import SmartFilter
+from handbrake_batch_compressor.src.utils.third_party_installers import setup_software
 
 app = typer.Typer(
     no_args_is_help=True,
