@@ -49,25 +49,28 @@ deletion of original files, show statistics during and after the compression, et
 
 ## 🛠️ Installation
 
-**TODO**: *ready-to-run builds to run on your machine*
+1. **Install python**:
+   - Window:
+      ```bash
+      winget install Python.Python.3.12
+      ```
+   - Linux:
+      ```bash
+      sudo apt-get install python3
+      ```
+   - macOS:
+      ```bash
+      brew install python
+      ```
 
-1. Clone this repository:
+2. **Install the handbrake-batch-compressor package:**
    ```bash
-   git clone https://github.com/Glitchy-Sheep/handbrake-batch-compressor.git
-   ```
-2. Install poetry:
-   ```bash
-   curl -sSL https://install.python-poetry.org | python3 -
+   pip install handbrake-batch-compressor
    ```
 
-3. Install dependencies:
+3. **Run the application:**
    ```bash
-   poetry install --no-root
-   ```
-
-4. Run the application:
-   ```bash
-   poetry run python main.py --help
+   handbrake-batch-compressor --help
    ```
 
 
