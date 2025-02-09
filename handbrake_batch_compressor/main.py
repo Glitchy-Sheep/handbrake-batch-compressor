@@ -8,7 +8,6 @@ from typing import Annotated
 
 import typer
 import typer.rich_utils
-
 from src.cli.cli_guards import (
     check_extensions_arguments,
     check_handbrakecli_options,
