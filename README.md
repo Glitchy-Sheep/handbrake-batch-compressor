@@ -1,6 +1,6 @@
 
 <p align="center">
-    <img src="./assets/banner.png" style="width: 80%; "/>
+    <img src="https://github.com/Glitchy-Sheep/handbrake-batch-compressor/blob/main/assets/banner.png?raw=true" style="width: 80%; "/>
 </p>
 
 # 🖥️ About
@@ -44,8 +44,8 @@ deletion of original files, show statistics during and after the compression, et
 
 ## 📸 Screenshots
 
-<img src="./assets/screenshot-1-compressing.png" style="width: 100%; "/>
-<img src="./assets/screenshot-2-nothing-to-do.png" style="width: 100%; "/>
+<img src="https://github.com/Glitchy-Sheep/handbrake-batch-compressor/blob/main/assets/screenshot-1-compressing.png?raw=true" style="width: 100%; "/>
+<img src="https://github.com/Glitchy-Sheep/handbrake-batch-compressor/blob/main/assets/screenshot-2-nothing-to-do.png?raw=true" style="width: 100%; "/>
 
 ## 🛠️ Installation
 
@@ -101,7 +101,7 @@ python main.py -t ./videos -o "--encoder x264 --quality 20" \
 <details>
     <summary style="display: flex; align-items: center;"> 
         <picture style="display: flex; width: 550px">
-            <img src="./assets/expand-examples-badge.png" style="cursor: pointer; pointer-events: none;"/>
+            <img src="https://raw.githubusercontent.com/Glitchy-Sheep/handbrake-batch-compressor/main/assets/expand-examples-badge.png" style="cursor: pointer; pointer-events: none;"/>
         </picture>
     </summary>
 
