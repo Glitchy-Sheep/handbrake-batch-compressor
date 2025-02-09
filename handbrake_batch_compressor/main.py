@@ -35,6 +35,13 @@ app = typer.Typer(
 )
 
 
+def show_version_and_exit() -> None:
+    """Show version and exit."""
+    __version__ = '1.1.0'
+    log.console.print(f'handbrake-batch-compressor {__version__}')
+    sys.exit(0)
+
+
 def remove_incomplete_files(incomplete_files: set[Path]) -> None:
     """Remove incomplete files and update the task queue."""
     for file in incomplete_files:
@@ -144,6 +151,14 @@ def main(  # noqa: PLR0913: too many arguments because of typer
             help='Show compression guide and exit. See it if you are not sure what to do.',
         ),
     ] = False,
+    version: Annotated[
+        bool,
+        typer.Option(
+            '--version',
+            '-v',
+            help='Show version and exit.',
+        ),
+    ] = False,
 ) -> None:
     """
     Compress your video files in batch with HandbrakeCLI.
@@ -160,6 +175,10 @@ def main(  # noqa: PLR0913: too many arguments because of typer
     5. Compress files excluding files with resolution and bitrate lower than the specified ones:
     - [bold] ./main.py -t ./videos --filter-min-resolution 720x480 --filter-min-bitrate 100 [/bold]
     """
+    if version:
+        show_version_and_exit()
+        return
+
     if guide:
         show_guide_and_exit()
         return

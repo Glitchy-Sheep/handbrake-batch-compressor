@@ -1,3 +1,7 @@
+# 1.1.0
+
+- Add --version argument to show the version and exit.
+
 # 1.0.1
 
 - Fix readme pictures links to make it accessible on pypi.
