@@ -1,6 +1,6 @@
 
 <p align="center">
-    <img src="./assets/banner.png" style="width: 80%; "/>
+    <img src="https://github.com/Glitchy-Sheep/handbrake-batch-compressor/blob/main/assets/banner.png?raw=true" style="width: 80%; "/>
 </p>
 
 # 🖥️ About
@@ -44,30 +44,33 @@ deletion of original files, show statistics during and after the compression, et
 
 ## 📸 Screenshots
 
-<img src="./assets/screenshot-1-compressing.png" style="width: 100%; "/>
-<img src="./assets/screenshot-2-nothing-to-do.png" style="width: 100%; "/>
+<img src="https://github.com/Glitchy-Sheep/handbrake-batch-compressor/blob/main/assets/screenshot-1-compressing.png?raw=true" style="width: 100%; "/>
+<img src="https://github.com/Glitchy-Sheep/handbrake-batch-compressor/blob/main/assets/screenshot-2-nothing-to-do.png?raw=true" style="width: 100%; "/>
 
 ## 🛠️ Installation
 
-**TODO**: *ready-to-run builds to run on your machine*
+1. **Install python**:
+   - Window:
+      ```bash
+      winget install Python.Python.3.12
+      ```
+   - Linux:
+      ```bash
+      sudo apt-get install python3
+      ```
+   - macOS:
+      ```bash
+      brew install python
+      ```
 
-1. Clone this repository:
+2. **Install the handbrake-batch-compressor package:**
    ```bash
-   git clone https://github.com/Glitchy-Sheep/handbrake-batch-compressor.git
-   ```
-2. Install poetry:
-   ```bash
-   curl -sSL https://install.python-poetry.org | python3 -
+   pip install handbrake-batch-compressor
    ```
 
-3. Install dependencies:
+3. **Run the application:**
    ```bash
-   poetry install --no-root
-   ```
-
-4. Run the application:
-   ```bash
-   poetry run python main.py --help
+   handbrake-batch-compressor --help
    ```
 
 
@@ -101,7 +104,7 @@ python main.py -t ./videos -o "--encoder x264 --quality 20" \
 <details>
     <summary style="display: flex; align-items: center;"> 
         <picture style="display: flex; width: 550px">
-            <img src="./assets/expand-examples-badge.png" style="cursor: pointer; pointer-events: none;"/>
+            <img src="https://raw.githubusercontent.com/Glitchy-Sheep/handbrake-batch-compressor/main/assets/expand-examples-badge.png" style="cursor: pointer; pointer-events: none;"/>
         </picture>
     </summary>
 
@@ -158,6 +161,7 @@ Here are the available options you can use when running the application:
 | `--filter-min-resolution`, `-r` | Skip videos with a resolution lower than the specified value (e.g., 720x480). |
 | `--keep-only-smaller`, `-k`     | Keep only videos that are smaller than the original ones after compression.   |
 | `--guide`, `-g`                 | Show a guide for using the application and exit.                              |
+| `--version`, `-v`               | Show the version and exit.                                                    |
 
 
 ## 📜 License

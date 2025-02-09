@@ -1,6 +1,6 @@
 from pathlib import Path
 
-from src.utils.ffmpeg_helpers import (
+from handbrake_batch_compressor.src.utils.ffmpeg_helpers import (
     VideoProperties,
     VideoResolution,
     get_video_properties,

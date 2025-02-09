@@ -1,3 +1,15 @@
+# 1.1.0
+
+- Add --version argument to show the version and exit.
+
+# 1.0.1
+
+- Fix readme pictures links to make it accessible on pypi.
+
+# 1.0.0
+
+- Add packaging with poetry.
+
 # 0.4.0
 
 - Add --guide argument to show basic information about the compression options.

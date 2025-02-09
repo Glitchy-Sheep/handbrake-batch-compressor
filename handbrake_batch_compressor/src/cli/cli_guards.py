@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 from textwrap import dedent
 
-from src.cli.logger import log
+from handbrake_batch_compressor.src.cli.logger import log
 
 
 def check_target_path(target_path: Path) -> None:

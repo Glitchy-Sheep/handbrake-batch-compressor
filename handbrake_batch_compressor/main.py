@@ -9,28 +9,37 @@ from typing import Annotated
 import typer
 import typer.rich_utils
 
-from src.cli.cli_guards import (
+from handbrake_batch_compressor.src.cli.cli_guards import (
     check_extensions_arguments,
     check_handbrakecli_options,
     check_target_path,
 )
-from src.cli.guide import show_guide_and_exit
-from src.cli.logger import log
-from src.compression.compression_manager import (
+from handbrake_batch_compressor.src.cli.guide import show_guide_and_exit
+from handbrake_batch_compressor.src.cli.logger import log
+from handbrake_batch_compressor.src.compression.compression_manager import (
     CompressionManager,
     CompressionManagerOptions,
 )
-from src.compression.handbrake_compressor import HandbrakeCompressor
-from src.utils.ffmpeg_helpers import VideoResolution
-from src.utils.files import get_video_files_paths
-from src.utils.smart_filters import SmartFilter
-from src.utils.third_party_installers import setup_software
+from handbrake_batch_compressor.src.compression.handbrake_compressor import (
+    HandbrakeCompressor,
+)
+from handbrake_batch_compressor.src.utils.ffmpeg_helpers import VideoResolution
+from handbrake_batch_compressor.src.utils.files import get_video_files_paths
+from handbrake_batch_compressor.src.utils.smart_filters import SmartFilter
+from handbrake_batch_compressor.src.utils.third_party_installers import setup_software
 
 app = typer.Typer(
     no_args_is_help=True,
     add_completion=False,
     rich_markup_mode='rich',
 )
+
+
+def show_version_and_exit() -> None:
+    """Show version and exit."""
+    __version__ = '1.1.0'
+    log.console.print(f'handbrake-batch-compressor {__version__}')
+    sys.exit(0)
 
 
 def remove_incomplete_files(incomplete_files: set[Path]) -> None:
@@ -142,6 +151,14 @@ def main(  # noqa: PLR0913: too many arguments because of typer
             help='Show compression guide and exit. See it if you are not sure what to do.',
         ),
     ] = False,
+    version: Annotated[
+        bool,
+        typer.Option(
+            '--version',
+            '-v',
+            help='Show version and exit.',
+        ),
+    ] = False,
 ) -> None:
     """
     Compress your video files in batch with HandbrakeCLI.
@@ -158,6 +175,10 @@ def main(  # noqa: PLR0913: too many arguments because of typer
     5. Compress files excluding files with resolution and bitrate lower than the specified ones:
     - [bold] ./main.py -t ./videos --filter-min-resolution 720x480 --filter-min-bitrate 100 [/bold]
     """
+    if version:
+        show_version_and_exit()
+        return
+
     if guide:
         show_guide_and_exit()
         return
