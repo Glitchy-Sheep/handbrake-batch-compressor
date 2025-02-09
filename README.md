@@ -161,6 +161,7 @@ Here are the available options you can use when running the application:
 | `--filter-min-resolution`, `-r` | Skip videos with a resolution lower than the specified value (e.g., 720x480). |
 | `--keep-only-smaller`, `-k`     | Keep only videos that are smaller than the original ones after compression.   |
 | `--guide`, `-g`                 | Show a guide for using the application and exit.                              |
+| `--version`, `-v`               | Show the version and exit.                                                    |
 
 
 ## 📜 License
