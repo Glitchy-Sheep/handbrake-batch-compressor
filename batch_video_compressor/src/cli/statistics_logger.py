@@ -6,11 +6,11 @@ from typing import TYPE_CHECKING
 
 from rich.markup import escape
 
-from src.utils.files import human_readable_size
+from batch_video_compressor.src.utils.files import human_readable_size
 
 if TYPE_CHECKING:
-    from src.cli.logger import AppLogger
-    from src.compression.compression_statistics import (
+    from batch_video_compressor.src.cli.logger import AppLogger
+    from batch_video_compressor.src.compression.compression_statistics import (
         CompressionStatistics,
         FileStatistics,
     )

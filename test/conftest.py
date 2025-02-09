@@ -5,7 +5,7 @@ from pathlib import Path
 import pytest
 from pydantic import BaseModel
 
-from src.utils.files import supported_videofile_extensions
+from batch_video_compressor.src.utils.files import supported_videofile_extensions
 
 
 @pytest.fixture

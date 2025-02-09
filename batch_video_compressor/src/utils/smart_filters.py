@@ -9,7 +9,10 @@ from __future__ import annotations
 from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from src.utils.ffmpeg_helpers import VideoProperties, VideoResolution
+    from batch_video_compressor.src.utils.ffmpeg_helpers import (
+        VideoProperties,
+        VideoResolution,
+    )
 
 
 class SmartFilter:

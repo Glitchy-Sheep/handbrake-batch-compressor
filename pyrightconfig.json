@@ -1,7 +1,7 @@
 {
     "typeCheckingMode": "strict",
     "include": [
-        "src"
+        "batch_video_compressor"
     ],
     "exclude": [
         "**/node_modules",

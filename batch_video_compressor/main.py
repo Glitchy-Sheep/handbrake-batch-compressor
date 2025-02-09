@@ -8,22 +8,25 @@ from typing import Annotated
 
 import typer
 import typer.rich_utils
-from src.cli.cli_guards import (
+
+from batch_video_compressor.src.cli.cli_guards import (
     check_extensions_arguments,
     check_handbrakecli_options,
     check_target_path,
 )
-from src.cli.guide import show_guide_and_exit
-from src.cli.logger import log
-from src.compression.compression_manager import (
+from batch_video_compressor.src.cli.guide import show_guide_and_exit
+from batch_video_compressor.src.cli.logger import log
+from batch_video_compressor.src.compression.compression_manager import (
     CompressionManager,
     CompressionManagerOptions,
 )
-from src.compression.handbrake_compressor import HandbrakeCompressor
-from src.utils.ffmpeg_helpers import VideoResolution
-from src.utils.files import get_video_files_paths
-from src.utils.smart_filters import SmartFilter
-from src.utils.third_party_installers import setup_software
+from batch_video_compressor.src.compression.handbrake_compressor import (
+    HandbrakeCompressor,
+)
+from batch_video_compressor.src.utils.ffmpeg_helpers import VideoResolution
+from batch_video_compressor.src.utils.files import get_video_files_paths
+from batch_video_compressor.src.utils.smart_filters import SmartFilter
+from batch_video_compressor.src.utils.third_party_installers import setup_software
 
 app = typer.Typer(
     no_args_is_help=True,

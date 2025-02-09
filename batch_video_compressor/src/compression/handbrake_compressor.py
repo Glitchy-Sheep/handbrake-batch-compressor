@@ -9,11 +9,11 @@ from collections.abc import Callable
 from pathlib import Path
 from shlex import split
 
-from src.cli.handbrake_cli_output_capturer import (
+from batch_video_compressor.src.cli.handbrake_cli_output_capturer import (
     HandbrakeProgressInfo,
     parse_handbrake_cli_output,
 )
-from src.cli.logger import log
+from batch_video_compressor.src.cli.logger import log
 
 
 class HandbrakeCompressor:

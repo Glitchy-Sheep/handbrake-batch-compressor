@@ -1,4 +1,7 @@
-from src.utils.files import get_video_files_paths, human_readable_size
+from batch_video_compressor.src.utils.files import (
+    get_video_files_paths,
+    human_readable_size,
+)
 from test.conftest import VideoSampleData
 
 

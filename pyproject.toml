@@ -15,6 +15,9 @@ dependencies = [
 ]
 
 
+[project.scripts]
+batch-video-compressor = "batch_video_compressor.main:app"
+
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
 build-backend = "poetry.core.masonry.api"
@@ -31,3 +34,5 @@ version = "0.4.0"
 description = "Simple script to traverse all the video files and compress them to optimize disk space for large files"
 authors = ["Roman Berezkin"]
 readme = "README.md"
+
+packages = [{ include = "batch_video_compressor" }]

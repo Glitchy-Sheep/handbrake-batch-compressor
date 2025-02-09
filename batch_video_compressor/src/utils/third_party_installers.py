@@ -5,7 +5,7 @@ import subprocess
 
 from pydantic import BaseModel
 
-from src.cli.logger import log
+from batch_video_compressor.src.cli.logger import log
 
 
 class InstallCommand(BaseModel):

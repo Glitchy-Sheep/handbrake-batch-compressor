@@ -2,7 +2,7 @@
 
 import sys
 
-from src.cli.logger import log
+from batch_video_compressor.src.cli.logger import log
 
 GUIDE = """\
 
