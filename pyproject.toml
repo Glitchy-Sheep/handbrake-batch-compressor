@@ -29,8 +29,5 @@ coverage = "^7.6.10"
 name = "batch-video-compressor"
 version = "0.4.0"
 description = "Simple script to traverse all the video files and compress them to optimize disk space for large files"
-authors = [
-    { name = "Roman Berezkin", email = "Glitchy-Sheep@users.noreply.github.com" },
-]
+authors = ["Roman Berezkin"]
 readme = "README.md"
-requires-python = ">=3.10,<3.14"
