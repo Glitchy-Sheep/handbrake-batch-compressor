@@ -68,4 +68,8 @@ class HandbrakeCompressor:
             )
             return False
 
+        # cleanup logs after a successful compression to not leave junk files
+        if stderr_log_filename.exists():
+            stderr_log_filename.unlink()
+
         return True

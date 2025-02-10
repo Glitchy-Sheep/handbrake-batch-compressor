@@ -1,3 +1,7 @@
+# 1.1.1
+
+- Remove junk log files after successful compression to not leave unnecessary traces.
+
 # 1.1.0
 
 - Add --version argument to show the version and exit.
