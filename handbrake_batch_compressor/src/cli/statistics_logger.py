@@ -4,8 +4,9 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
-from handbrake_batch_compressor.src.utils.files import human_readable_size
 from rich.markup import escape
+
+from handbrake_batch_compressor.src.utils.files import human_readable_size
 
 if TYPE_CHECKING:
     from handbrake_batch_compressor.src.cli.logger import AppLogger

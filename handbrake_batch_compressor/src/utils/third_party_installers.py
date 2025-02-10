@@ -3,8 +3,9 @@
 import os
 import subprocess
 
-from handbrake_batch_compressor.src.cli.logger import log
 from pydantic import BaseModel
+
+from handbrake_batch_compressor.src.cli.logger import log
 
 
 class InstallCommand(BaseModel):

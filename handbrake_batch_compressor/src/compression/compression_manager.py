@@ -4,14 +4,15 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING
 
+from pydantic import BaseModel
+from rich.progress import Progress
+
 from handbrake_batch_compressor.src.cli.logger import log
 from handbrake_batch_compressor.src.cli.statistics_logger import StatisticsLogger
 from handbrake_batch_compressor.src.compression.compression_statistics import (
     CompressionStatistics,
 )
 from handbrake_batch_compressor.src.utils.ffmpeg_helpers import get_video_properties
-from pydantic import BaseModel
-from rich.progress import Progress
 
 if TYPE_CHECKING:
     from collections.abc import Callable
