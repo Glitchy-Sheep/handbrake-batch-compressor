@@ -22,5 +22,9 @@ Describe in detail what has changed, why it is needed, and what problems this PR
 - [ ] Essential tests added  
 - [ ] Documentation updated  
 
+- [ ] Update changelog and versions everywhere (if necessary)
+- [ ] Add tags to a specific commit and push them to trigger a release (if necessary)
+
+
 ## ⚠ Notes  
 <!-- Any important notes about the PR. -->  
