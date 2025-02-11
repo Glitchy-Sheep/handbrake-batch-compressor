@@ -149,6 +149,6 @@ def get_video_properties(video_path: Path) -> VideoProperties | None:
     else:
         return VideoProperties(
             resolution=resolution,
-            frame_rate=float(frame_rate),
+            frame_rate=frame_rate,
             bitrate_kbytes=bitrate_kbytes,
         )
