@@ -1,3 +1,7 @@
+# 1.1.2
+
+- Fix the bug with crashing on videos with Variable Frame Rate (VFR)
+
 # 1.1.1
 
 - Remove junk log files after successful compression to not leave unnecessary traces.

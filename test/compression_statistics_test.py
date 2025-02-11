@@ -1,13 +1,17 @@
 from pathlib import Path
 
 import pytest
+
 from handbrake_batch_compressor.src.compression.compression_statistics import (
     CompressionStatistics,
 )
 
 
 @pytest.fixture
-def video_files(tmp_path: Path, request: pytest.FixtureRequest) -> tuple[Path, Path]:
+def video_files(
+    tmp_path: Path,
+    request: pytest.FixtureRequest,
+) -> tuple[Path, Path]:
     input_size = request.param['input_size']
     output_size = request.param['output_size']
 

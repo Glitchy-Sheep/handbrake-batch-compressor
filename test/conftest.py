@@ -3,8 +3,9 @@ from collections.abc import Generator
 from pathlib import Path
 
 import pytest
-from handbrake_batch_compressor.src.utils.files import supported_videofile_extensions
 from pydantic import BaseModel
+
+from handbrake_batch_compressor.src.utils.files import supported_videofile_extensions
 
 
 @pytest.fixture

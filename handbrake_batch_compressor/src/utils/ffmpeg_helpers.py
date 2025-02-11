@@ -7,6 +7,7 @@ It will be used for smart filters.
 from __future__ import annotations
 
 import functools
+from fractions import Fraction
 from typing import TYPE_CHECKING
 
 import av
@@ -14,6 +15,9 @@ from pydantic import BaseModel
 
 if TYPE_CHECKING:
     from pathlib import Path
+
+    from av.container.input import InputContainer
+    from av.video.stream import VideoStream
 
 
 class InvalidResolutionError(Exception):
@@ -83,6 +87,47 @@ class VideoProperties(BaseModel):
     bitrate_kbytes: int
 
 
+def estimate_fps_from_timestamps(
+    container: InputContainer,
+    stream: VideoStream,
+) -> Fraction | None:
+    """Estimate average FPS from timestamps for VFR (Variable Frame Rate) video."""
+    timestamps: list[Fraction] = [
+        Fraction(packet.pts, packet.time_base.denominator)  # Convert to Fraction
+        for packet in container.demux(stream)
+        if packet.pts is not None and packet.time_base is not None
+    ]
+
+    if len(timestamps) > 1:
+        intervals = [j - i for i, j in zip(timestamps[:-1], timestamps[1:])]
+        avg_interval = sum(intervals, start=Fraction(0)) / len(intervals)
+        return Fraction(1, avg_interval) if avg_interval > 0 else None
+
+    return None
+
+
+def extract_bitrate_from_stream(
+    container: InputContainer,
+    stream: VideoStream,
+) -> float:
+    """
+    Estimate FPS using the following methods:
+
+    - Codec Context
+    - Average Rate (if previous is unavailable)
+    - Timestamps (if previous is unavailable)
+    """
+    fps = stream.codec_context.framerate
+    if fps is None or fps == 0:
+        fps = stream.average_rate
+    if fps is None or fps == 0:
+        fps = estimate_fps_from_timestamps(container, stream)
+    if fps is None or fps == 0:
+        fps = 1.0
+
+    return float(fps)
+
+
 def get_video_properties(video_path: Path) -> VideoProperties | None:
     """
     Get the resolution, frame rate and bitrate of a video as a VideoProperties object.
@@ -96,7 +141,7 @@ def get_video_properties(video_path: Path) -> VideoProperties | None:
             width=stream.width,
             height=stream.height,
         )
-        frame_rate = stream.codec_context.framerate
+        frame_rate = extract_bitrate_from_stream(probe, stream)
         bitrate_kbytes = probe.bit_rate // 1024
         probe.close()
     except (av.InvalidDataError, IndexError):
@@ -104,6 +149,6 @@ def get_video_properties(video_path: Path) -> VideoProperties | None:
     else:
         return VideoProperties(
             resolution=resolution,
-            frame_rate=float(frame_rate),
+            frame_rate=frame_rate,
             bitrate_kbytes=bitrate_kbytes,
         )

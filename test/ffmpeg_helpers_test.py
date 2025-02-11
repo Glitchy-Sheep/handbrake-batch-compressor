@@ -7,10 +7,12 @@ from handbrake_batch_compressor.src.utils.ffmpeg_helpers import (
 )
 
 
-def test_get_video_resolution(video_720p_2mb_mp4: Path):
-    video_properties: VideoProperties = get_video_properties(
+def test_get_video_properties(video_720p_2mb_mp4: Path):
+    video_properties: VideoProperties | None = get_video_properties(
         video_720p_2mb_mp4,
     )
+
+    assert video_properties is not None
 
     assert video_properties.resolution.width == 1280
     assert video_properties.resolution.height == 720
