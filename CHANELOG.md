@@ -1,3 +1,8 @@
+# 1.1.3
+
+- Add possibility to gracefully stop the compression process by keyboard (ctrl + c).
+- More elegant error handling/logging system using custom exceptions.
+
 # 1.1.2
 
 - Fix the bug with crashing on videos with Variable Frame Rate (VFR)
