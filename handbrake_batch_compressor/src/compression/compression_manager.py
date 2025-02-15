@@ -12,6 +12,12 @@ from handbrake_batch_compressor.src.cli.statistics_logger import StatisticsLogge
 from handbrake_batch_compressor.src.compression.compression_statistics import (
     CompressionStatistics,
 )
+from handbrake_batch_compressor.src.errors.cancel_compression_by_user import (
+    CompressionCancelledByUserError,
+)
+from handbrake_batch_compressor.src.errors.handbrake_cli_exceptions import (
+    CompressionFailedError,
+)
 from handbrake_batch_compressor.src.utils.ffmpeg_helpers import get_video_properties
 
 if TYPE_CHECKING:
@@ -120,39 +126,45 @@ class CompressionManager:
             video.parent / f'{video.stem}.{self.options.progress_ext}{video.suffix}'
         ).absolute()
 
-        success = self.compressor.compress(
-            video,
-            output_video,
-            on_update=on_progress_update or (lambda _: None),
+        try:
+            self.compressor.compress(
+                video,
+                output_video,
+                on_update=on_progress_update or (lambda _: None),
+            )
+        except (CompressionFailedError, CompressionCancelledByUserError):
+            # If the compression failed during encoding - remove the output video
+            # because it's useless
+            if output_video.exists():
+                output_video.unlink()
+            raise
+
+        completed_stem = output_video.stem.replace(
+            self.options.progress_ext,
+            self.options.complete_ext,
+        )
+        output_video = output_video.rename(
+            video.parent / f'{completed_stem}{video.suffix}',
         )
 
-        if success:
-            completed_stem = output_video.stem.replace(
-                self.options.progress_ext,
-                self.options.complete_ext,
+        if self.options.show_stats:
+            current_video_stats = self.statistics.add_compression_info(
+                video,
+                output_video,
             )
-            output_video = output_video.rename(
-                video.parent / f'{completed_stem}{video.suffix}',
+            self.statistics_logger.log_stats(current_video_stats)
+
+        if (
+            self.options.keep_only_smaller
+            and output_video.stat().st_size > video.stat().st_size
+        ):
+            self.statistics.skip_file(video)
+            log.info(
+                f"Skipped {video.name} ([yellow]didn't pass keep_only_smaller[/yellow])",
+                highlight=False,
             )
+            output_video.unlink()
+            return
 
-            if self.options.show_stats:
-                current_video_stats = self.statistics.add_compression_info(
-                    video,
-                    output_video,
-                )
-                self.statistics_logger.log_stats(current_video_stats)
-
-            if (
-                self.options.keep_only_smaller
-                and output_video.stat().st_size > video.stat().st_size
-            ):
-                self.statistics.skip_file(video)
-                log.info(
-                    f"Skipped {video.name} ([yellow]didn't pass keep_only_smaller[/yellow])",
-                    highlight=False,
-                )
-                output_video.unlink()
-                return
-
-            if self.options.delete_original_files:
-                video.unlink()
+        if self.options.delete_original_files:
+            video.unlink()

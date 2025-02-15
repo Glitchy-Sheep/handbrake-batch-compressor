@@ -13,7 +13,12 @@ from handbrake_batch_compressor.src.cli.handbrake_cli_output_capturer import (
     HandbrakeProgressInfo,
     parse_handbrake_cli_output,
 )
-from handbrake_batch_compressor.src.cli.logger import log
+from handbrake_batch_compressor.src.errors.cancel_compression_by_user import (
+    CompressionCancelledByUserError,
+)
+from handbrake_batch_compressor.src.errors.handbrake_cli_exceptions import (
+    CompressionFailedError,
+)
 
 
 class HandbrakeCompressor:
@@ -28,7 +33,7 @@ class HandbrakeCompressor:
         input_video: Path,
         output_video: Path,
         on_update: Callable[[HandbrakeProgressInfo], None] = lambda _: None,
-    ) -> bool:
+    ) -> None:
         """
         Compress a single video file.
 
@@ -55,21 +60,25 @@ class HandbrakeCompressor:
                 universal_newlines=True,
             )
 
-            if process.stdout:
-                for line in process.stdout:
-                    info = parse_handbrake_cli_output(line)
-                    on_update(info)
+            try:
+                if process.stdout:
+                    for line in process.stdout:
+                        info = parse_handbrake_cli_output(line)
+                        on_update(info)
 
-            process.wait()
+                process.wait()
+            except KeyboardInterrupt:
+                process.terminate()
+                process.wait()
+                raise CompressionCancelledByUserError from None
 
         if not output_video.exists():
-            log.error(
-                f'Compression failed for {input_video.name}. Check {stderr_log_filename} for details.',
+            # Propagate failed compression if there is no result
+            raise CompressionFailedError(
+                input_video,
+                stderr_log_filename,
             )
-            return False
 
         # cleanup logs after a successful compression to not leave junk files
         if stderr_log_filename.exists():
             stderr_log_filename.unlink()
-
-        return True
