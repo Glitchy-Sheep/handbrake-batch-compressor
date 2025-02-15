@@ -23,6 +23,12 @@ from handbrake_batch_compressor.src.compression.compression_manager import (
 from handbrake_batch_compressor.src.compression.handbrake_compressor import (
     HandbrakeCompressor,
 )
+from handbrake_batch_compressor.src.errors.cancel_compression_by_user import (
+    CompressionCancelledByUserError,
+)
+from handbrake_batch_compressor.src.errors.handbrake_cli_exceptions import (
+    CompressionFailedError,
+)
 from handbrake_batch_compressor.src.utils.ffmpeg_helpers import VideoResolution
 from handbrake_batch_compressor.src.utils.files import get_video_files_paths
 from handbrake_batch_compressor.src.utils.smart_filters import SmartFilter
@@ -37,7 +43,7 @@ app = typer.Typer(
 
 def show_version_and_exit() -> None:
     """Show version and exit."""
-    __version__ = '1.1.2'
+    __version__ = '1.1.3'
     log.console.print(f'handbrake-batch-compressor {__version__}')
     sys.exit(0)
 
@@ -257,4 +263,11 @@ def main(  # noqa: PLR0913: too many arguments because of typer
 
 
 if __name__ == '__main__':
-    app()
+    try:
+        app()
+    except CompressionFailedError as e:
+        log.error(str(e))
+        sys.exit(1)
+    except CompressionCancelledByUserError as e:
+        log.success(str(e))
+        sys.exit(1)
