@@ -66,20 +66,30 @@ class HandbrakeCompressor:
             # Handle stdout line by line to update progress
             async def handle_stdout() -> None:
                 if process.stdout is not None:
-                    while not process.stdout.at_eof():
-                        line = await process.stdout.readuntil(b'\r')
-                        decoded_line = line.decode('utf-8')
-                        info = parse_handbrake_cli_output(decoded_line)
+                    try:
+                        while not process.stdout.at_eof():
+                            line = await process.stdout.readuntil(b'\r')
+                            decoded_line = line.decode('utf-8')
+                            info = parse_handbrake_cli_output(decoded_line)
+                            on_update(info)
+                    except asyncio.IncompleteReadError as e:  # end of stream reached
+                        line = e.partial.decode()
+                        info = parse_handbrake_cli_output(line)
                         on_update(info)
+                        return
 
             # Handle stderr line by line for saving error messages to buffer
             # after failed compression all the errors will be saved to a log file
             async def handle_stderr() -> None:
                 if process.stderr is not None:
-                    while not process.stderr.at_eof():
-                        line = await process.stderr.readuntil(b'\r')
-                        decoded_line = line.decode('utf-8')
-                        error_buffer.write(decoded_line)
+                    try:
+                        while not process.stderr.at_eof():
+                            line = await process.stderr.readuntil(b'\r')
+                            decoded_line = line.decode('utf-8')
+                            error_buffer.write(decoded_line)
+                    except asyncio.IncompleteReadError as e:  # end of stream reached
+                        error_buffer.write(e.partial.decode())
+                        return
 
             await asyncio.gather(
                 handle_stdout(),
