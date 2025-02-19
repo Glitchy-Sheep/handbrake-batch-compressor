@@ -4,10 +4,13 @@ The module provides a class to compress videos using HandbrakeCLI.
 It will be used to compress the videos and to log the progress.
 """
 
-import subprocess
+import asyncio
 from collections.abc import Callable
+from io import StringIO
 from pathlib import Path
 from shlex import split
+
+import aiofiles
 
 from handbrake_batch_compressor.src.cli.handbrake_cli_output_capturer import (
     HandbrakeProgressInfo,
@@ -28,7 +31,7 @@ class HandbrakeCompressor:
         """Initialize the HandbrakeCompressor with the given handbrakecli options."""
         self.handbrakecli_options = handbrakecli_options
 
-    def compress(
+    async def compress(
         self,
         input_video: Path,
         output_video: Path,
@@ -49,36 +52,62 @@ class HandbrakeCompressor:
         ]
 
         stderr_log_filename = Path('last_compression.log')
+        process = await asyncio.create_subprocess_exec(
+            *compress_cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
 
-        with stderr_log_filename.open('w+', encoding='utf-8') as log_file:
-            process = subprocess.Popen(  # noqa: S603 - compress_cmd is safe and checked before, but maybe we can remove this ignore with a more elegant solution
-                compress_cmd,
-                stdout=subprocess.PIPE,
-                stderr=log_file,
-                text=True,
-                bufsize=1,
-                universal_newlines=True,
-            )
+        try:
+            # Buffering stderr until we detect that error occurred
+            # (stderr contains not only errors but also service info)
+            error_buffer = StringIO()
 
-            try:
-                if process.stdout:
-                    for line in process.stdout:
-                        info = parse_handbrake_cli_output(line)
+            # Handle stdout line by line to update progress
+            async def handle_stdout() -> None:
+                if process.stdout is not None:
+                    while not process.stdout.at_eof():
+                        line = await process.stdout.readuntil(b'\r')
+                        decoded_line = line.decode('utf-8')
+                        info = parse_handbrake_cli_output(decoded_line)
                         on_update(info)
 
-                process.wait()
-            except KeyboardInterrupt:
-                process.terminate()
-                process.wait()
-                raise CompressionCancelledByUserError from None
+            # Handle stderr line by line for saving error messages to buffer
+            # after failed compression all the errors will be saved to a log file
+            async def handle_stderr() -> None:
+                if process.stderr is not None:
+                    while not process.stderr.at_eof():
+                        line = await process.stderr.readuntil(b'\r')
+                        decoded_line = line.decode('utf-8')
+                        error_buffer.write(decoded_line)
 
-        if not output_video.exists():
-            # Propagate failed compression if there is no result
-            raise CompressionFailedError(
-                input_video,
-                stderr_log_filename,
+            await asyncio.gather(
+                handle_stdout(),
+                handle_stderr(),
             )
 
-        # cleanup logs after a successful compression to not leave junk files
-        if stderr_log_filename.exists():
-            stderr_log_filename.unlink()
+            await process.wait()
+
+            # Check if the compression was successful
+            # (compressed video should exist)
+            if not output_video.exists():
+                # Log error to file
+                async with aiofiles.open(stderr_log_filename, mode='a') as f:
+                    await f.write('\n')
+                    await f.write('*' * 30 + input_video.name + '*' * 30 + '\n')
+                    await f.write(error_buffer.getvalue())
+
+                # Propagate failed compression if there is no result
+                raise CompressionFailedError(
+                    input_video,
+                    stderr_log_filename,
+                )
+
+        # In case of ctrl_+ c just cancell the process
+        except KeyboardInterrupt as e:
+            process.terminate()
+            await process.wait()
+            if output_video.exists():  # Interrupted encoding can't be successful
+                output_video.unlink()  # so delete the output
+
+            raise CompressionCancelledByUserError from e

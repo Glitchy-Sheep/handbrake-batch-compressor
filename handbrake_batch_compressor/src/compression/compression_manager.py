@@ -127,10 +127,12 @@ class CompressionManager:
         ).absolute()
 
         try:
-            self.compressor.compress(
-                video,
-                output_video,
-                on_update=on_progress_update or (lambda _: None),
+            asyncio.run(
+                self.compressor.compress(
+                    video,
+                    output_video,
+                    on_update=on_progress_update or (lambda _: None),
+                ),
             )
         except (CompressionFailedError, CompressionCancelledByUserError):
             # If the compression failed during encoding - remove the output video
