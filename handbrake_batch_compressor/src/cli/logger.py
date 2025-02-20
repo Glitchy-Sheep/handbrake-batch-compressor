@@ -50,23 +50,23 @@ class AppLogger:
         self.console.log(msg, highlight=highlight)
 
     def info(self, msg: str, *, highlight: bool = True) -> None:
-        prefix = f'[cyan]{self.prefix}[/cyan][blue].INFO 🔹[/blue]:'
+        prefix = f'[cyan]{self.prefix}[/cyan][blue].INFO 🔹[/blue] :'
         self._log_message(logging.INFO, f'{prefix} {msg}', highlight=highlight)
 
     def success(self, msg: str, *, highlight: bool = True) -> None:
-        prefix = f'[cyan]{self.prefix}[/cyan][green].SUCCESS ✔[/green]:'
+        prefix = f'[cyan]{self.prefix}[/cyan][green].SUCCESS ✔[/green] :'
         self._log_message(logging.INFO, f'{prefix} {msg}', highlight=highlight)
 
     def error(self, msg: str, *, highlight: bool = True) -> None:
-        prefix = f'[cyan]{self.prefix}[/cyan][bold red].ERROR ❌[/bold red]:'
+        prefix = f'[cyan]{self.prefix}[/cyan][bold red].ERROR ❌[/bold red] :'
         self._log_message(logging.ERROR, f'{prefix} {msg}', highlight=highlight)
 
     def wait(self, msg: str, *, highlight: bool = True) -> None:
-        prefix = f'[cyan]{self.prefix}[/cyan][yellow].WAIT ⏳[/yellow]:'
+        prefix = f'[cyan]{self.prefix}[/cyan][yellow].WAIT ⏳[/yellow] :'
         self._log_message(logging.INFO, f'{prefix} {msg}', highlight=highlight)
 
     def warning(self, msg: str, *, highlight: bool = True) -> None:
-        prefix = f'[cyan]{self.prefix}[/cyan][bold yellow].WARNING ⚠ [/bold yellow]:'
+        prefix = f'[cyan]{self.prefix}[/cyan][bold yellow].WARNING ⚠[/bold yellow] :'
         self._log_message(logging.WARNING, f'{prefix} {msg}', highlight=highlight)
 
 
