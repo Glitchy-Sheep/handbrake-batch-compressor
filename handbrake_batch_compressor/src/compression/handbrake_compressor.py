@@ -109,7 +109,7 @@ class HandbrakeCompressor:
                     await f.write('*' * 30 + input_video.name + '*' * 30 + '\n')
                     await f.write(error_buffer.getvalue())
 
-                # Propagate failed compression if there is no result
+                # Propagate failed compression to the manager
                 raise CompressionFailedError(
                     input_video,
                     stderr_log_filename,

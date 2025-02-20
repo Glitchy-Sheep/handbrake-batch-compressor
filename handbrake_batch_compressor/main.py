@@ -111,6 +111,13 @@ def main(  # noqa: PLR0913: too many arguments because of typer
             help='Should the original files be deleted after compression.',
         ),
     ] = False,
+    skip_failed_files: Annotated[
+        bool,
+        typer.Option(
+            '--skip-failed-files',
+            help='Should failed files be skipped.',
+        ),
+    ] = False,
     #
     # ---------- Smart Filter options ----------
     #
@@ -254,6 +261,7 @@ def main(  # noqa: PLR0913: too many arguments because of typer
             keep_only_smaller=keep_only_smaller,
             progress_ext=progress_ext,
             complete_ext=complete_ext,
+            skip_failed_files=skip_failed_files,
         ),
     )
 
