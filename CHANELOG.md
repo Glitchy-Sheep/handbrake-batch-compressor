@@ -1,3 +1,11 @@
+# 2.0.0
+
+- Added the --skip-failed-files argument to allow skipping failed compressions and continuing with the next file.
+- Fixed an error handling bug in the main try/except block.
+- Improved logger formatting for better readability.
+- Enabled parallel capturing of stderr and stdout for HandBrakeCLI; revamped the error logging system to log only errors.
+- Various minor fixes, formatting improvements, and optimizations.
+
 # 1.1.3
 
 - Add possibility to gracefully stop the compression process by keyboard (ctrl + c).
