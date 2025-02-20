@@ -270,7 +270,13 @@ def main(  # noqa: PLR0913: too many arguments because of typer
     log.success('Everything is done! 🎉')
 
 
-if __name__ == '__main__':
+def bootstrap() -> None:
+    """
+    Entry point of the CLI binary.
+
+    It's separated from module into a function for proper error handling
+    after installation.
+    """
     try:
         app()
 
@@ -282,3 +288,7 @@ if __name__ == '__main__':
         log.error(str(e))
     except CompressionCancelledByUserError as e:
         log.success(str(e))
+
+
+if __name__ == '__main__':
+    bootstrap()

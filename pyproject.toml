@@ -17,7 +17,7 @@ dependencies = [
 
 
 [project.scripts]
-handbrake-batch-compressor = "handbrake_batch_compressor.main:app"
+handbrake-batch-compressor = "handbrake_batch_compressor.main:bootstrap"
 
 [build-system]
 requires = ["poetry-core>=2.0.0,<3.0.0"]
