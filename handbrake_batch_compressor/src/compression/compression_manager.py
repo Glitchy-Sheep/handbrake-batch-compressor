@@ -6,7 +6,17 @@ import asyncio
 from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
-from rich.progress import Progress
+from rich.align import Align
+from rich.console import Group
+from rich.live import Live
+from rich.panel import Panel
+from rich.progress import (
+    BarColumn,
+    Progress,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+)
+from rich.rule import Rule
 
 from handbrake_batch_compressor.src.cli.logger import log
 from handbrake_batch_compressor.src.cli.statistics_logger import StatisticsLogger
@@ -66,18 +76,50 @@ class CompressionManager:
 
     def compress_all_videos(self) -> None:
         """Compress all the videos in the given directory."""
-        with Progress(
+        general_progress = Progress(
+            'Compressing videos: {task.description} ([bold blue]{task.completed}/{task.total}[/bold blue])',
+            BarColumn(bar_width=None),
+            'Time Elapsed: ',
+            TimeElapsedColumn(),
             console=log.console,
             transient=True,
+        )
+
+        task_progress = Progress(
+            '{task.description}',  # Indented description for subtasks
+            BarColumn(bar_width=None),
+            '[progress.percentage]{task.percentage:>3.0f}%',
+            'Current ETA: ',
+            TimeRemainingColumn(),
+            transient=True,
+        )
+
+        video_name_max_length = 30
+
+        with Live(
+            Align.left(
+                Panel(
+                    Group(
+                        general_progress,
+                        Rule(),
+                        task_progress,
+                    ),
+                ),
+                vertical='middle',
+                width=120,
+            ),
             refresh_per_second=1,
-        ) as progress:
-            all_videos_task = progress.add_task(
-                description=f'Compressing videos (0/{len(self.video_files)}) 0%',
+            console=log.console,
+            transient=True,
+        ):
+            all_videos_task = general_progress.add_task(
+                description='Compressing videos',
                 total=len(self.video_files),
             )
 
-            for idx, video in enumerate(self.video_files):
+            for video in self.video_files:
                 video_properties = get_video_properties(video)
+
                 if video_properties is None:
                     log.error(
                         f"""Error getting video properties for {video.name}. The file is probably corrupted. Skipping...""",
@@ -92,27 +134,36 @@ class CompressionManager:
                     self.statistics.skip_file(video)
                     continue
 
-                current_compression = progress.add_task(
+                shortened_video_name = video.name[:video_name_max_length]
+                shortened_video_name += (
+                    '...' if len(video.name) > video_name_max_length else ''
+                )
+
+                current_compression = task_progress.add_task(
                     total=100,
-                    description=f'Compressing {video.name} (0%)',
+                    description=f'Compressing {shortened_video_name}',
+                )
+
+                general_progress.update(
+                    all_videos_task,
+                    description=shortened_video_name,
                 )
 
                 self.compress_video(
                     video,
                     on_progress_update=lambda info,
-                    task=current_compression: progress.update(
+                    task=current_compression: task_progress.update(
                         task,
                         description=f'[italic]FPS: {info.fps_current or ""}[/italic] - [underline] Average FPS: {info.fps_average or ""}',
                         completed=info.progress,
                     ),
                 )
 
-                progress.update(
+                general_progress.update(
                     all_videos_task,
                     advance=1,
-                    description=f'Compressing videos ({idx + 1}/{len(self.video_files)}) {int((idx + 1) / len(self.video_files) * 100)}%',
                 )
-                progress.remove_task(current_compression)
+                task_progress.remove_task(current_compression)
 
         if self.options.show_stats:
             self.statistics_logger.log_stats()

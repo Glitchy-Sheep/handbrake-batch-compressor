@@ -1,3 +1,7 @@
+# 2.1.0
+
+- Enhance look of progress bars. (Add elapsed time, better formatting, panels)
+
 # 2.0.1
 
 - Fix a bug with encoding in utf-8.
