@@ -212,7 +212,7 @@ def main(  # noqa: PLR0913: too many arguments because of typer
 
     if len(video_files) == 0:
         log.success('No video files found. - Nothing to do.')
-        sys.exit(1)
+        sys.exit(0)
 
     log.success(f'Found {len(video_files)} video files.')
 
@@ -280,10 +280,12 @@ def bootstrap() -> None:
     try:
         app()
 
-    # Can be thrown by typer/clink internally during KeyboardInterrupt
-    except SystemExit:
-        actual_exception = CompressionCancelledByUserError()
-        log.success(str(actual_exception))
+    # Typer will throw 130 exit code on ctrl + c interruption
+    except SystemExit as e:
+        sigterm_code = 130
+        if e.code == sigterm_code:
+            actual_exception = CompressionCancelledByUserError()
+            log.success(str(actual_exception))
     except CompressionFailedError as e:
         log.error(str(e))
     except CompressionCancelledByUserError as e:
