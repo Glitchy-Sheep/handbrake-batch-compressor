@@ -43,8 +43,8 @@ app = typer.Typer(
 
 def show_version_and_exit() -> None:
     """Show version and exit."""
-    __version__ = '1.1.3'
-    log.console.print(f'handbrake-batch-compressor {__version__}')
+    __version__ = '2.0.0'
+    log.raw_log(f'handbrake-batch-compressor {__version__}')
     sys.exit(0)
 
 
@@ -109,6 +109,13 @@ def main(  # noqa: PLR0913: too many arguments because of typer
             '--delete-original-files',
             '-d',
             help='Should the original files be deleted after compression.',
+        ),
+    ] = False,
+    skip_failed_files: Annotated[
+        bool,
+        typer.Option(
+            '--skip-failed-files',
+            help="Failed compressions will be skipped and won't stop the processing.",
         ),
     ] = False,
     #
@@ -254,6 +261,7 @@ def main(  # noqa: PLR0913: too many arguments because of typer
             keep_only_smaller=keep_only_smaller,
             progress_ext=progress_ext,
             complete_ext=complete_ext,
+            skip_failed_files=skip_failed_files,
         ),
     )
 
@@ -262,12 +270,25 @@ def main(  # noqa: PLR0913: too many arguments because of typer
     log.success('Everything is done! 🎉')
 
 
-if __name__ == '__main__':
+def bootstrap() -> None:
+    """
+    Entry point of the CLI binary.
+
+    It's separated from module into a function for proper error handling
+    after installation.
+    """
     try:
         app()
+
+    # Can be thrown by typer/clink internally during KeyboardInterrupt
+    except SystemExit:
+        actual_exception = CompressionCancelledByUserError()
+        log.success(str(actual_exception))
     except CompressionFailedError as e:
         log.error(str(e))
-        sys.exit(1)
     except CompressionCancelledByUserError as e:
         log.success(str(e))
-        sys.exit(1)
+
+
+if __name__ == '__main__':
+    bootstrap()

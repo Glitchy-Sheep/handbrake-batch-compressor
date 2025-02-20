@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import asyncio
 from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
@@ -41,6 +42,7 @@ class CompressionManagerOptions(BaseModel):
     keep_only_smaller: bool = False
     progress_ext: str = 'compressing'
     complete_ext: str = 'compressed'
+    skip_failed_files: bool = False
 
 
 class CompressionManager:
@@ -127,16 +129,27 @@ class CompressionManager:
         ).absolute()
 
         try:
-            self.compressor.compress(
-                video,
-                output_video,
-                on_update=on_progress_update or (lambda _: None),
+            asyncio.run(
+                self.compressor.compress(
+                    video,
+                    output_video,
+                    on_update=on_progress_update or (lambda _: None),
+                ),
             )
-        except (CompressionFailedError, CompressionCancelledByUserError):
+        except (CompressionFailedError, CompressionCancelledByUserError) as e:
             # If the compression failed during encoding - remove the output video
             # because it's useless
             if output_video.exists():
                 output_video.unlink()
+
+            if isinstance(e, CompressionFailedError) and self.options.skip_failed_files:
+                log.error(str(e))
+                log.warning(
+                    'Skipping the video according to the [bold]--skip-failed-files[/bold] flag',
+                )
+                self.statistics.skip_file(video)
+                return
+
             raise
 
         completed_stem = output_video.stem.replace(
