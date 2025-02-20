@@ -91,10 +91,12 @@ class HandbrakeCompressor:
                         error_buffer.write(e.partial.decode())
                         return
 
-            await asyncio.gather(
-                handle_stdout(),
-                handle_stderr(),
-            )
+            tasks = [
+                asyncio.create_task(handle_stdout()),
+                asyncio.create_task(handle_stderr()),
+            ]
+
+            await asyncio.gather(*tasks, return_exceptions=True)
 
             await process.wait()
 
@@ -114,8 +116,8 @@ class HandbrakeCompressor:
                 )
 
         # In case of ctrl_+ c just cancell the process
-        except KeyboardInterrupt as e:
-            process.terminate()
+        except (asyncio.CancelledError, KeyboardInterrupt) as e:
+            process.kill()
             await process.wait()
             if output_video.exists():  # Interrupted encoding can't be successful
                 output_video.unlink()  # so delete the output

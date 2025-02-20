@@ -265,9 +265,12 @@ def main(  # noqa: PLR0913: too many arguments because of typer
 if __name__ == '__main__':
     try:
         app()
+
+    # Can be thrown by typer/clink internally during KeyboardInterrupt
+    except SystemExit:
+        actual_exception = CompressionCancelledByUserError()
+        log.success(str(actual_exception))
     except CompressionFailedError as e:
         log.error(str(e))
-        sys.exit(1)
     except CompressionCancelledByUserError as e:
         log.success(str(e))
-        sys.exit(1)
