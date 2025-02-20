@@ -1,3 +1,7 @@
+# 2.0.1
+
+- Fix a bug with encoding in utf-8.
+
 # 2.0.0
 
 - Added the --skip-failed-files argument to allow skipping failed compressions and continuing with the next file.
