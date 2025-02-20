@@ -104,7 +104,11 @@ class HandbrakeCompressor:
             # (compressed video should exist)
             if not output_video.exists():
                 # Log error to file
-                async with aiofiles.open(stderr_log_filename, mode='a') as f:
+                async with aiofiles.open(
+                    stderr_log_filename,
+                    mode='a',
+                    encoding='utf-8',
+                ) as f:
                     await f.write('\n')
                     await f.write(
                         '*' * 30 + ' ' + input_video.name + ' ' + '*' * 30 + '\n',
