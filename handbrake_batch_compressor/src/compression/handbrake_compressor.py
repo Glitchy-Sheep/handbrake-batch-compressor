@@ -51,7 +51,7 @@ class HandbrakeCompressor:
             *split(self.handbrakecli_options),
         ]
 
-        stderr_log_filename = Path('last_compression.log')
+        stderr_log_filename = Path('errors.log')
         process = await asyncio.create_subprocess_exec(
             *compress_cmd,
             stdout=asyncio.subprocess.PIPE,
