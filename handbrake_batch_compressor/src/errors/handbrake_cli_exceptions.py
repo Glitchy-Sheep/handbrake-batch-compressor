@@ -8,5 +8,5 @@ class CompressionFailedError(Exception):
 
     def __init__(self, input_video: Path, stderr_log_filename: Path) -> None:
         super().__init__(
-            f'Compression failed for {input_video.name}. Check {stderr_log_filename} for details.',
+            f'Compression failed for {input_video.name}. \nCheck {stderr_log_filename} for details.',
         )
