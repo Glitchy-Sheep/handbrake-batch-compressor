@@ -115,7 +115,7 @@ def main(  # noqa: PLR0913: too many arguments because of typer
         bool,
         typer.Option(
             '--skip-failed-files',
-            help='Should failed files be skipped.',
+            help="Failed compressions will be skipped and won't stop the processing.",
         ),
     ] = False,
     #

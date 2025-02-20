@@ -162,6 +162,7 @@ Here are the available options you can use when running the application:
 | `--keep-only-smaller`, `-k`     | Keep only videos that are smaller than the original ones after compression.   |
 | `--guide`, `-g`                 | Show a guide for using the application and exit.                              |
 | `--version`, `-v`               | Show the version and exit.                                                    |
+| `--skip-failed-files`, `-f`     | Failed compressions will be skipped and won't stop the processing.            |
 
 
 ## 📜 License
