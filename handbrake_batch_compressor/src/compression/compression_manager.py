@@ -143,7 +143,10 @@ class CompressionManager:
                 output_video.unlink()
 
             if isinstance(e, CompressionFailedError) and self.options.skip_failed_files:
-                log.warning(f'Skipping failed file {video.name}')
+                log.error(str(e))
+                log.warning(
+                    'Skipping the video according to the [bold]--skip-failed-files[/bold] flag',
+                )
                 self.statistics.skip_file(video)
                 return
 
