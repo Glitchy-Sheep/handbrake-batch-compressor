@@ -106,7 +106,9 @@ class HandbrakeCompressor:
                 # Log error to file
                 async with aiofiles.open(stderr_log_filename, mode='a') as f:
                     await f.write('\n')
-                    await f.write('*' * 30 + input_video.name + '*' * 30 + '\n')
+                    await f.write(
+                        '*' * 30 + ' ' + input_video.name + ' ' + '*' * 30 + '\n',
+                    )
                     await f.write(error_buffer.getvalue())
 
                 # Propagate failed compression to the manager
