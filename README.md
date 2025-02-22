@@ -39,8 +39,9 @@ It offers many [features](#-features) to customize the compression process such 
 
 ## 📸 Screenshots
 
-<img src="./assets/compressing-example-1.png" style="width: 100%; "/>
-<img src="./assets/compressing-example-2.png" style="width: 100%; "/>
+<img src="https://raw.githubusercontent.com/Glitchy-Sheep/handbrake-batch-compressor/refs/heads/feature/simplify-cli-options/assets/compressing-example-1.png" style="width: 100%; "/>
+
+<img src="https://raw.githubusercontent.com/Glitchy-Sheep/handbrake-batch-compressor/refs/heads/feature/simplify-cli-options/assets/compressing-example-2.png" style="width: 100%; "/>
 
 ## 🛠️ Installation
 
@@ -73,7 +74,7 @@ It offers many [features](#-features) to customize the compression process such 
 
 **Highly recommended** to see both `--help` and `--guide` before compression.
 
-<img src="./assets/usage.png" style="width: 100%; "/>
+<img src="https://raw.githubusercontent.com/Glitchy-Sheep/handbrake-batch-compressor/refs/heads/feature/simplify-cli-options/assets/usage.png" style="width: 100%; "/>
 
 ### ⚙️ Advanced Usage
 
