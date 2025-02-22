@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import asyncio
+from enum import Enum
 from typing import TYPE_CHECKING
 
 from pydantic import BaseModel
@@ -44,15 +45,41 @@ if TYPE_CHECKING:
     from handbrake_batch_compressor.src.utils.smart_filters import SmartFilter
 
 
+class IneffectiveCompressionBehavior(str, Enum):
+    """
+    Option to choose how to handle ineffective compressions (when compressed file is larger).
+
+    mark_original - Mark the original file as compressed.
+    delete_compressed - Delete the larger file and mark the other one as compressed.
+    keep_both - Keep both files in any case.
+    """
+
+    mark_original = 'mark_original'
+    delete_compressed = 'delete_compressed'
+    keep_both = 'keep_both'
+
+
+class EffectiveCompressionBehavior(str, Enum):
+    """
+    Option to choose how to handle effective compressions (when compressed file is smaller).
+
+    delete_original - Delete the original file.
+    keep_both - Keep both files in any case.
+    """
+
+    delete_original = 'delete_original'
+    keep_both = 'keep_both'
+
+
 class CompressionManagerOptions(BaseModel):
     """Main options for the compression manager."""
 
     show_stats: bool = False
-    delete_original_files: bool = False
-    keep_only_smaller: bool = False
     progress_ext: str = 'compressing'
     complete_ext: str = 'compressed'
     skip_failed_files: bool = False
+    ineffective_compression_behavior: IneffectiveCompressionBehavior
+    effective_compression_behavior: EffectiveCompressionBehavior
 
 
 class CompressionManager:
@@ -86,7 +113,7 @@ class CompressionManager:
         )
 
         task_progress = Progress(
-            '{task.description}',  # Indented description for subtasks
+            '{task.description}',
             BarColumn(bar_width=None),
             '[progress.percentage]{task.percentage:>3.0f}%',
             'Current ETA: ',
@@ -168,6 +195,45 @@ class CompressionManager:
         if self.options.show_stats:
             self.statistics_logger.log_stats()
 
+    def handle_effective_compression(self, video: Path) -> None:
+        if (
+            self.options.effective_compression_behavior
+            == EffectiveCompressionBehavior.delete_original
+        ):
+            log.info(f'Deleting original video {video.name}')
+            video.unlink()
+        elif (
+            self.options.effective_compression_behavior
+            == EffectiveCompressionBehavior.keep_both
+        ):
+            pass
+
+    def handle_ineffective_compression(self, output_video: Path, video: Path) -> None:
+        if (
+            self.options.ineffective_compression_behavior
+            == IneffectiveCompressionBehavior.mark_original
+        ):
+            self.statistics.skip_file(video)
+            output_video.unlink()
+            video.rename(output_video)
+            log.info(
+                f'Deleting ineffective compression: {output_video.name} and marking the {video.name} as compressed.',
+            )
+        elif (
+            self.options.ineffective_compression_behavior
+            == IneffectiveCompressionBehavior.delete_compressed
+        ):
+            output_video.unlink()
+            self.statistics.skip_file(video)
+            log.info(
+                f'Skipping ineffective compression: {output_video.name}.',
+            )
+        elif (
+            self.options.ineffective_compression_behavior
+            == IneffectiveCompressionBehavior.keep_both
+        ):
+            pass
+
     def compress_video(
         self,
         video: Path,
@@ -218,17 +284,11 @@ class CompressionManager:
             )
             self.statistics_logger.log_stats(current_video_stats)
 
-        if (
-            self.options.keep_only_smaller
-            and output_video.stat().st_size > video.stat().st_size
-        ):
-            self.statistics.skip_file(video)
-            log.info(
-                f"Skipped {video.name} ([yellow]didn't pass keep_only_smaller[/yellow])",
-                highlight=False,
-            )
-            output_video.unlink()
-            return
+        # Now compressed video is marked as completed and we still have the original one
 
-        if self.options.delete_original_files:
-            video.unlink()
+        compression_is_ineffective = output_video.stat().st_size > video.stat().st_size
+
+        if compression_is_ineffective:
+            self.handle_ineffective_compression(output_video, video)
+        else:
+            self.handle_effective_compression(video)

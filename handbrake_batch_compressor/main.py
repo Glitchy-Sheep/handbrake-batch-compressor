@@ -19,6 +19,8 @@ from handbrake_batch_compressor.src.cli.logger import log
 from handbrake_batch_compressor.src.compression.compression_manager import (
     CompressionManager,
     CompressionManagerOptions,
+    EffectiveCompressionBehavior,
+    IneffectiveCompressionBehavior,
 )
 from handbrake_batch_compressor.src.compression.handbrake_compressor import (
     HandbrakeCompressor,
@@ -43,7 +45,7 @@ app = typer.Typer(
 
 def show_version_and_exit() -> None:
     """Show version and exit."""
-    __version__ = '2.1.0'
+    __version__ = '3.0.0'
     log.raw_log(f'handbrake-batch-compressor {__version__}')
     sys.exit(0)
 
@@ -75,7 +77,7 @@ def main(  # noqa: PLR0913: too many arguments because of typer
         typer.Option(
             '--handbrakecli-options',
             '-o',
-            help="You can pass HandbrakeCLI options through this argument. (Don't forget to quote them in one string)",
+            help="You can pass HandbrakeCLI options through this argument. (Don't forget to quote them in one string, see [bold green]Example 3[/bold green])",
         ),
     ] = '',
     progress_ext: Annotated[
@@ -103,19 +105,35 @@ def main(  # noqa: PLR0913: too many arguments because of typer
             help='Should stats be shown during the compression and after it.',
         ),
     ] = False,
-    delete_original_files: Annotated[
-        bool,
+    #
+    # File operation options
+    #
+    ineffective_compression_behavior: Annotated[
+        IneffectiveCompressionBehavior,
         typer.Option(
-            '--delete-original-files',
-            '-d',
-            help='Should the original files be deleted after compression.',
+            '--ineffective-compression-behavior',
+            '-i',
+            help='How to [bold]handle ineffective compressions[/bold]. ([bold red]mark_original[/bold red], [bold yellow]delete_compressed[/bold yellow], [bold green]keep_both[/bold green])'
+            "\n\n* [bold red]mark_original[/bold red] will delete the compressed video if it's larger [bold]and mark original as compressed[/bold]."
+            "\n\n* [bold yellow]delete_compressed[/bold yellow] will delete only the compressed file if it's larger and keep original."
+            '\n\n* [bold green]keep_both[/bold green] will keep both files.',
         ),
-    ] = False,
+    ] = IneffectiveCompressionBehavior.delete_compressed,
+    effective_compression_behavior: Annotated[
+        EffectiveCompressionBehavior,
+        typer.Option(
+            '--effective-compression-behavior',
+            '-e',
+            help='How to [bold]handle effective compressions[/bold]. ([bold red]delete_original[/bold red], [bold green]keep_both[/bold green])'
+            '\n\n* [bold red]delete_original[/bold red] will delete the original file and keep the compressed file.'
+            '\n\n* [bold green]keep_both[/bold green] will keep both files.',
+        ),
+    ] = EffectiveCompressionBehavior.keep_both,
     skip_failed_files: Annotated[
         bool,
         typer.Option(
             '--skip-failed-files',
-            help="Failed compressions will be skipped and won't stop the processing.",
+            help='Skip files that failed to compress, instead of stopping the processing.',
         ),
     ] = False,
     #
@@ -147,14 +165,6 @@ def main(  # noqa: PLR0913: too many arguments because of typer
             metavar='<WIDTH>x<HEIGHT>',
         ),
     ] = None,
-    keep_only_smaller: Annotated[
-        bool,
-        typer.Option(
-            '--keep-only-smaller',
-            '-k',
-            help='Should only videos smaller than the original be kept. If used with -d and files are larger than the original, they will [bold]not be deleted.[/bold]',
-        ),
-    ] = False,
     # ---------- HandbrakeCLI options guide ----------
     guide: Annotated[
         bool,
@@ -177,15 +187,16 @@ def main(  # noqa: PLR0913: too many arguments because of typer
     Compress your video files in batch with HandbrakeCLI.
 
     [bold green]Examples:[/bold green]
-    1. Compress all videos in `./videos` and delete originals:
-    - [bold] ./main.py -t ./videos -d [/bold]
-    2. Compress files with custom encoder and quality:
-    - [bold] ./main.py -t ./videos -o "--encoder qsv_h264 --quality 20" [/bold]
-    3. Compress using a preset:
-    - [bold] ./main.py -t ./videos -o "--preset 'Fast 720p30'" [/bold]
-    4. Compress files and leave only those smaller than the original and show stats:
-    - [bold] ./main.py -t ./videos -k -s [/bold]
-    5. Compress files excluding files with resolution and bitrate lower than the specified ones:
+    1. Compress all videos in `./videos` and delete ineffective (larger) ones:
+    - [bold] ./main.py -t ./videos --effective-compression-behavior mark_original --ineffective-compression-behavior delete_compressed [/bold]
+
+    2. Compress files with custom encoder, preset and quality:
+    - [bold] ./main.py -t ./videos -o "--encoder qsv_h264 --quality 20 --preset 'Very Fast 720p30'"[/bold]
+
+    3. Compress files and keep both files in any case showing statistic:
+    - [bold] ./main.py -t ./videos -e keep_both -i keep_both -s [/bold]
+
+    4. Compress files excluding files with resolution and bitrate lower than the specified ones:
     - [bold] ./main.py -t ./videos --filter-min-resolution 720x480 --filter-min-bitrate 100 [/bold]
     """
     if version:
@@ -257,11 +268,11 @@ def main(  # noqa: PLR0913: too many arguments because of typer
         smart_filter=smart_filter,
         options=CompressionManagerOptions(
             show_stats=show_stats,
-            delete_original_files=delete_original_files,
-            keep_only_smaller=keep_only_smaller,
             progress_ext=progress_ext,
             complete_ext=complete_ext,
             skip_failed_files=skip_failed_files,
+            ineffective_compression_behavior=ineffective_compression_behavior,
+            effective_compression_behavior=effective_compression_behavior,
         ),
     )
 
