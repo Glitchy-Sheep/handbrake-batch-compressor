@@ -49,14 +49,14 @@ class IneffectiveCompressionBehavior(str, Enum):
     """
     Option to choose how to handle ineffective compressions (when compressed file is larger).
 
-    delete - Delete the larger file and mark the other one as compressed.
-    skip - Delete the larger (compressed) file only.
-    keep - Keep both files in any case.
+    mark_original - Mark the original file as compressed.
+    delete_compressed - Delete the larger file and mark the other one as compressed.
+    keep_both - Keep both files in any case.
     """
 
-    delete = 'delete'
-    skip = 'skip'
-    keep = 'keep'
+    mark_original = 'mark_original'
+    delete_compressed = 'delete_compressed'
+    keep_both = 'keep_both'
 
 
 class EffectiveCompressionBehavior(str, Enum):
@@ -64,11 +64,11 @@ class EffectiveCompressionBehavior(str, Enum):
     Option to choose how to handle effective compressions (when compressed file is smaller).
 
     delete_original - Delete the original file.
-    keep - Keep both files in any case.
+    keep_both - Keep both files in any case.
     """
 
-    delete_original = 'delete'
-    keep = 'keep'
+    delete_original = 'delete_original'
+    keep_both = 'keep_both'
 
 
 class CompressionManagerOptions(BaseModel):
@@ -204,14 +204,14 @@ class CompressionManager:
             video.unlink()
         elif (
             self.options.effective_compression_behavior
-            == EffectiveCompressionBehavior.keep
+            == EffectiveCompressionBehavior.keep_both
         ):
             pass
 
     def handle_ineffective_compression(self, output_video: Path, video: Path) -> None:
         if (
             self.options.ineffective_compression_behavior
-            == IneffectiveCompressionBehavior.delete
+            == IneffectiveCompressionBehavior.mark_original
         ):
             self.statistics.skip_file(video)
             output_video.unlink()
@@ -221,7 +221,7 @@ class CompressionManager:
             )
         elif (
             self.options.ineffective_compression_behavior
-            == IneffectiveCompressionBehavior.skip
+            == IneffectiveCompressionBehavior.delete_compressed
         ):
             output_video.unlink()
             self.statistics.skip_file(video)
@@ -230,7 +230,7 @@ class CompressionManager:
             )
         elif (
             self.options.ineffective_compression_behavior
-            == IneffectiveCompressionBehavior.keep
+            == IneffectiveCompressionBehavior.keep_both
         ):
             pass
 

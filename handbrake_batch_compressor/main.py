@@ -113,22 +113,22 @@ def main(  # noqa: PLR0913: too many arguments because of typer
         typer.Option(
             '--ineffective-compression-behavior',
             '-i',
-            help='How to [bold]handle ineffective compressions[/bold]. ([bold red]delete[/bold red], [bold yellow]skip[/bold yellow], [bold green]keep[/bold green])'
-            "\n\n* [bold red]delete[/bold red] will delete the compressed video if it's larger [bold]and mark original as compressed[/bold]."
-            "\n\n* [bold yellow]skip[/bold yellow] will delete only the compressed file if it's larger and keep original."
-            '\n\n* [bold green]keep[/bold green] will keep both files in any case.',
+            help='How to [bold]handle ineffective compressions[/bold]. ([bold red]mark_original[/bold red], [bold yellow]delete_compressed[/bold yellow], [bold green]keep_both[/bold green])'
+            "\n\n* [bold red]mark_original[/bold red] will delete the compressed video if it's larger [bold]and mark original as compressed[/bold]."
+            "\n\n* [bold yellow]delete_compressed[/bold yellow] will delete only the compressed file if it's larger and keep original."
+            '\n\n* [bold green]keep_both[/bold green] will keep both files.',
         ),
-    ] = IneffectiveCompressionBehavior.skip,
+    ] = IneffectiveCompressionBehavior.delete_compressed,
     effective_compression_behavior: Annotated[
         EffectiveCompressionBehavior,
         typer.Option(
             '--effective-compression-behavior',
             '-e',
-            help='How to [bold]handle effective compressions[/bold]. ([bold red]delete_original[/bold red], [bold yellow]keep_both[/bold yellow])'
+            help='How to [bold]handle effective compressions[/bold]. ([bold red]delete_original[/bold red], [bold green]keep_both[/bold green])'
             '\n\n* [bold red]delete_original[/bold red] will delete the original file and keep the compressed file.'
-            '\n\n* [bold green]keep[/bold green] will keep both files in any case.',
+            '\n\n* [bold green]keep_both[/bold green] will keep both files.',
         ),
-    ] = EffectiveCompressionBehavior.keep,
+    ] = EffectiveCompressionBehavior.keep_both,
     skip_failed_files: Annotated[
         bool,
         typer.Option(
@@ -187,15 +187,16 @@ def main(  # noqa: PLR0913: too many arguments because of typer
     Compress your video files in batch with HandbrakeCLI.
 
     [bold green]Examples:[/bold green]
-    1. Compress all videos in `./videos` and delete originals:
-    - [bold] ./main.py -t ./videos -d [/bold]
-    2. Compress files with custom encoder and quality:
-    - [bold] ./main.py -t ./videos -o "--encoder qsv_h264 --quality 20" [/bold]
-    3. Compress using a preset:
-    - [bold] ./main.py -t ./videos -o "--preset 'Fast 720p30'" [/bold]
-    4. Compress files and leave only those smaller than the original and show stats:
-    - [bold] ./main.py -t ./videos -k -s [/bold]
-    5. Compress files excluding files with resolution and bitrate lower than the specified ones:
+    1. Compress all videos in `./videos` and delete ineffective (larger) ones:
+    - [bold] ./main.py -t ./videos --effective-compression-behavior mark_original --ineffective-compression-behavior delete_compressed [/bold]
+
+    2. Compress files with custom encoder, preset and quality:
+    - [bold] ./main.py -t ./videos -o "--encoder qsv_h264 --quality 20 --preset 'Very Fast 720p30'"[/bold]
+
+    3. Compress files and keep both files in any case showing statistic:
+    - [bold] ./main.py -t ./videos -e keep_both -i keep_both -s [/bold]
+
+    4. Compress files excluding files with resolution and bitrate lower than the specified ones:
     - [bold] ./main.py -t ./videos --filter-min-resolution 720x480 --filter-min-bitrate 100 [/bold]
     """
     if version:
