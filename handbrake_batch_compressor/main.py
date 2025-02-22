@@ -45,7 +45,7 @@ app = typer.Typer(
 
 def show_version_and_exit() -> None:
     """Show version and exit."""
-    __version__ = '2.1.0'
+    __version__ = '3.0.0'
     log.raw_log(f'handbrake-batch-compressor {__version__}')
     sys.exit(0)
 

@@ -1,3 +1,19 @@
+# 3.0.0 - New flexible file handling options.
+
+- Simplify the CLI interface by changing file-based options:
+- Add options: `--ineffective-compression-behavior` and `--effective-compression-behavior`.
+- Removed: `--keep-only-smaller` (now it's obsolete).
+
+**BREAKING CHANGES:**
+
+- Removed the `--keep-only-smaller` option. 
+  Now you can specify options for handling ineffective and effective compressions instead:
+  - `--ineffective-compression-behavior` 
+  - `--effective-compression-behavior` 
+
+  So the flag `--keep-only-smaller` becomes `--ineffective-compression-behavior skip`
+
+
 # 2.1.0
 
 - Enhance look of progress bars. (Add elapsed time, better formatting, panels)
